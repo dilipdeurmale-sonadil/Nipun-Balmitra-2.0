@@ -1321,8 +1321,9 @@
         try {
           recognition = new SR();
           recognition.lang = 'mr-IN';
-          recognition.continuous = true;
+          recognition.continuous = false;
           recognition.interimResults = true;
+          recognition.maxAlternatives = 3;
           recognition.onresult = (e) => {
             let txt = '';
             for (let i = 0; i < e.results.length; i++) {
@@ -1333,13 +1334,27 @@
               hint.textContent = `🗣️ ऐकले: "${recognizedTranscript}"`;
             }
           };
-          recognition.onerror = () => {
+          recognition.onerror = (ev) => {
+            const err = ev && ev.error ? ev.error : '';
             if (hint && !recognizedTranscript) {
-              hint.textContent = '🎙️ आवाज ऐकू आला नाही. माईक परवानगी तपासा व पुन्हा बोला.';
+              if (err === 'not-allowed' || err === 'service-not-allowed') {
+                hint.textContent = '🚫 माईक परवानगी बंद आहे. Chrome/App Settings मधून Microphone Allow करा.';
+              } else if (err === 'network') {
+                hint.textContent = '🌐 आवाज ओळखण्यासाठी इंटरनेट चालू असणे आवश्यक आहे.';
+              } else {
+                hint.textContent = '🎙️ आवाज स्पष्ट ऐकू आला नाही. कृपया मोठ्याने पुन्हा बोला.';
+              }
+            }
+          };
+          recognition.onend = () => {
+            if (recognizedTranscript && btnStop && !btnStop.disabled) {
+              finishMic(targetText, isOral);
             }
           };
           recognition.start();
         } catch (_) {}
+      } else if (hint) {
+        hint.textContent = '⚠️ या ब्राउझरमध्ये मराठी व्हॉइस ओळख उपलब्ध नाही. Google Chrome वापरा.';
       }
 
       // Only run MediaRecorder for Oral mode so it doesn't block SpeechRecognition mic on Android
@@ -1416,7 +1431,7 @@
 
       let matched = 0;
       targetWords.forEach(w => {
-        if (spokenWords.some(sw => sw === w || (w.length > 1 && (sw.includes(w) || w.includes(sw))))) {
+        if (spokenWords.some(sw => sw === w || (w.length > 1 && sw.includes(w)))) {
           matched++;
         }
       });
@@ -1503,12 +1518,18 @@
         }
         const { data: { text } } = await Tesseract.recognize(file, 'mar');
         const cleanedOcr = (text || '').replace(/\s+/g, ' ').trim();
-        const targetWords = currentOcrTarget.replace(/[.,!?।]/g, '').split(/\s+/).filter(Boolean);
-        const ocrWords = cleanedOcr.replace(/[.,!?।]/g, '').split(/\s+/).filter(Boolean);
+        const cleanWord = (s) => (s || '').replace(/[^\u0900-\u097Fa-zA-Z0-9]/g, '').trim();
+        const targetWords = currentOcrTarget.split(/\s+/).map(cleanWord).filter(Boolean);
+        const ocrWords = cleanedOcr.split(/\s+/).map(cleanWord).filter(Boolean);
 
         let matched = 0;
         targetWords.forEach(w => {
-          if (ocrWords.some(ow => ow.includes(w) || w.includes(ow))) matched++;
+          const found = ocrWords.some(ow => {
+            if (ow === w) return true;
+            if (w.length >= 2 && ow.includes(w) && ow.length <= w.length + 2) return true;
+            return false;
+          });
+          if (found) matched++;
         });
         const pct = Math.round((matched / Math.max(1, targetWords.length)) * 100);
         const isNipun = pct >= 80;
