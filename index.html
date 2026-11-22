@@ -1294,7 +1294,9 @@
     let audioChunks = [];
     let recognition = null;
     let recognizedTranscript = '';
+    let accumulatedTranscript = '';
     let isMicPaused = false;
+    let isListeningActive = false;
 
     let karaokeTimer = null;
     function clearKaraokeTimer() {
@@ -1381,6 +1383,7 @@
           if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
         }
       } catch (_) {}
+      isListeningActive = false;
       try { if (recognition) recognition.stop(); } catch (_) {}
       mediaRecorder = null;
       recognition = null;
@@ -1452,7 +1455,9 @@
     async function startMic(targetText, isOral = false) {
       stopAllAudioAndMic();
       recognizedTranscript = '';
+      accumulatedTranscript = '';
       audioChunks = [];
+      isListeningActive = true;
 
       const wave = document.getElementById('waveBox');
       const btnStart = document.getElementById('btnRecStart');
@@ -1464,48 +1469,55 @@
       if (btnStart) btnStart.disabled = true;
       if (btnPause) { btnPause.disabled = false; btnPause.innerHTML = '<span>⏸️</span><span>थांबवा</span>'; }
       if (btnStop) btnStop.disabled = false;
-      if (hint) hint.textContent = '🎙️ रेकॉर्डिंग सुरू आहे... मोठ्याने व स्पष्ट बोला.';
+      if (hint) hint.textContent = '🎙️ रेकॉर्डिंग सुरू आहे... पूर्ण मजकूर वाचून झाल्यावर "बंद करा" दाबा.';
 
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SR) {
-        try {
-          recognition = new SR();
-          recognition.lang = 'mr-IN';
-          recognition.continuous = false;
-          recognition.interimResults = true;
-          recognition.maxAlternatives = 3;
-          recognition.onresult = (e) => {
-            let txt = '';
-            for (let i = 0; i < e.results.length; i++) {
-              txt += e.results[i][0].transcript + ' ';
-            }
-            recognizedTranscript = txt.trim();
-            if (!isOral) {
-              updateLiveReadingFeedback(targetText, recognizedTranscript, false);
-            }
-            if (hint && recognizedTranscript) {
-              hint.textContent = `🗣️ ऐकले: "${recognizedTranscript}"`;
-            }
-          };
-          recognition.onerror = (ev) => {
-            const err = ev && ev.error ? ev.error : '';
-            if (hint && !recognizedTranscript) {
-              if (err === 'not-allowed' || err === 'service-not-allowed') {
-                hint.textContent = '🚫 माईक परवानगी बंद आहे. खालील ⌨️ कीबोर्ड माईक वापरा.';
-              } else if (err === 'network') {
-                hint.textContent = '🌐 आवाज ओळखण्यासाठी इंटरनेट चालू ठेवा किंवा ⌨️ कीबोर्ड माईक वापरा.';
-              } else {
-                hint.textContent = '⚠️ क्रोम माईक प्रतिसाद देत नाही. खालील ⌨️ कीबोर्ड माईक (🎙️) वापरा.';
+        const launchRecognition = () => {
+          if (!isListeningActive || isMicPaused) return;
+          try {
+            recognition = new SR();
+            recognition.lang = 'mr-IN';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 3;
+            recognition.onresult = (e) => {
+              let segTxt = '';
+              for (let i = 0; i < e.results.length; i++) {
+                segTxt += e.results[i][0].transcript + ' ';
               }
-            }
-          };
-          recognition.onend = () => {
-            if (recognizedTranscript && btnStop && !btnStop.disabled) {
-              finishMic(targetText, isOral);
-            }
-          };
-          recognition.start();
-        } catch (_) {}
+              recognizedTranscript = (accumulatedTranscript + ' ' + segTxt).trim();
+              if (!isOral) {
+                const res = updateLiveReadingFeedback(targetText, recognizedTranscript, false);
+                if (res.total > 0 && res.matchedCount >= res.total) {
+                  finishMic(targetText, false);
+                  return;
+                }
+              }
+              if (hint && recognizedTranscript) {
+                hint.textContent = `🗣️ ऐकले: "${recognizedTranscript}" (संपल्यावर 'बंद करा' दाबा)`;
+              }
+            };
+            recognition.onerror = (ev) => {
+              const err = ev && ev.error ? ev.error : '';
+              if (err === 'not-allowed' || err === 'service-not-allowed') {
+                isListeningActive = false;
+                if (hint) hint.textContent = '🚫 माईक परवानगी बंद आहे. खालील ⌨️ कीबोर्ड माईक वापरा.';
+              } else if (err === 'network') {
+                isListeningActive = false;
+                if (hint) hint.textContent = '🌐 आवाज ओळखण्यासाठी इंटरनेट चालू ठेवा किंवा ⌨️ कीबोर्ड माईक वापरा.';
+              }
+            };
+            recognition.onend = () => {
+              accumulatedTranscript = recognizedTranscript;
+              if (isListeningActive && !isMicPaused) {
+                setTimeout(launchRecognition, 150);
+              }
+            };
+            recognition.start();
+          } catch (_) {}
+        };
+        launchRecognition();
       } else if (hint) {
         hint.textContent = '⚠️ क्रोम माईक उपलब्ध नाही. खालील ⌨️ कीबोर्ड माईक (🎙️) वापरा.';
       }
@@ -1546,6 +1558,7 @@
     }
 
     function finishMic(targetText, isOral = false) {
+      isListeningActive = false;
       const wave = document.getElementById('waveBox');
       const btnStart = document.getElementById('btnRecStart');
       const btnPause = document.getElementById('btnRecPause');
