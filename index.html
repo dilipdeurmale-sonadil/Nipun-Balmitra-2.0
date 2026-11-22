@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="./icon.png?v=2">
-<link rel="apple-touch-icon" href="./icon.png?v=2">
-<link rel="manifest" href="./manifest.json?v=2">
+  <link rel="apple-touch-icon" href="./icon.png?v=2">
+  <link rel="manifest" href="./manifest.json?v=2">
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}</script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0F766E" />
   <title>निपुण बालमित्र 2.0 - सरावातून निपुणतेकडे</title>
@@ -49,7 +47,6 @@
       color: var(--navy);
     }
 
-    /* App Shell: Zero-Scroll 100dvh Flex Container */
     .app-shell {
       display: flex;
       flex-direction: column;
@@ -61,14 +58,12 @@
       overflow: hidden;
     }
 
-    /* Cream Classroom Card */
     .cream-card {
       background: var(--cream);
       border-radius: 1rem;
       box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 118, 110, 0.08);
     }
 
-    /* Touch-friendly interactive buttons */
     .touch-btn {
       transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease;
       cursor: pointer;
@@ -83,7 +78,6 @@
       transform: none;
     }
 
-    /* Single-Row 6-Button Navigation Bar (Fits cleanly even on 360px screens) */
     .nav-row-6 {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -119,7 +113,6 @@
       color: #0F766E;
     }
 
-    /* 4-Button Single Row for Audio/Mic Controls */
     .audio-grid-4 {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -147,7 +140,6 @@
       cursor: not-allowed;
     }
 
-    /* Fixed Two-Line Footer with Safe Bottom Padding */
     .app-footer {
       flex-shrink: 0;
       background: linear-gradient(90deg, #0F172A 0%, #134E4A 50%, #0F172A 100%);
@@ -159,7 +151,6 @@
       z-index: 30;
     }
 
-    /* Audio Waveform Animation */
     .wave-bar {
       width: 4px;
       height: 6px;
@@ -182,7 +173,6 @@
       to { height: 18px; }
     }
 
-    /* Digital Slate Canvas (Grade 1 Writing) */
     .slate-canvas {
       background: #1E293B;
       border: 4px solid #B45309;
@@ -194,7 +184,6 @@
       display: block;
     }
 
-    /* Custom subtle scrollbars only where strictly needed */
     .thin-scroll::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -208,9 +197,7 @@
 <body>
   <div class="app-shell">
 
-    <!-- ===================================================================== -->
-    <!-- 1. TOP HEADER & SINGLE-ROW 6-BUTTON NAV BAR (Hidden on Welcome)       -->
-    <!-- ===================================================================== -->
+    <!-- 1. TOP HEADER & SINGLE-ROW 6-BUTTON NAV BAR -->
     <header id="appHeader" class="hidden shrink-0 bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-800 text-white px-2.5 pt-2 pb-1.5 shadow-md z-20">
       <div class="flex items-center justify-between gap-1.5 mb-1.5">
         <div class="flex items-center gap-1.5 min-w-0">
@@ -237,7 +224,6 @@
         </div>
       </div>
 
-      <!-- Single-Row 6-Button Navigation Bar -->
       <nav id="studentNavBar" class="nav-row-6" aria-label="मुख्य नेव्हिगेशन">
         <button id="navBtn0" type="button" onclick="goToScreen(1)" class="touch-btn nav-pill">
           <span>🏠</span><span>मुखपृष्ठ</span>
@@ -260,14 +246,10 @@
       </nav>
     </header>
 
-    <!-- ===================================================================== -->
-    <!-- 2. MAIN VIEWPORT (Zero-Scroll Flex Area)                              -->
-    <!-- ===================================================================== -->
+    <!-- 2. MAIN VIEWPORT -->
     <main class="flex-1 min-h-0 flex flex-col p-2 sm:p-3 overflow-hidden relative">
 
-      <!-- =================================================================== -->
-      <!-- SCREEN 0: WELCOME & मनोगत                                           -->
-      <!-- =================================================================== -->
+      <!-- SCREEN 0: WELCOME -->
       <section id="screen0" class="flex-1 min-h-0 flex flex-col items-center justify-center">
         <div class="cream-card w-full max-w-md border-2 border-orange-300 p-4 sm:p-5 flex flex-col items-center text-center gap-2.5 max-h-full overflow-y-auto thin-scroll">
           <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-teal-600 flex items-center justify-center text-3xl shadow-lg border-2 border-white">
@@ -305,9 +287,7 @@
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- SCREEN 1: STUDENT LOGIN                                             -->
-      <!-- =================================================================== -->
+      <!-- SCREEN 1: STUDENT LOGIN -->
       <section id="screen1" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
         <div class="cream-card w-full max-w-md border-2 border-teal-400 p-4 flex flex-col gap-3 max-h-full overflow-y-auto thin-scroll">
           <div class="flex items-center justify-between border-b border-amber-200 pb-2">
@@ -332,9 +312,7 @@
 
           <div>
             <div class="text-xs font-extrabold text-slate-700 mb-1.5">इयत्ता निवडा :</div>
-            <div id="gradeBtnGroup" class="grid grid-cols-5 gap-1.5">
-              <!-- Populated by JS -->
-            </div>
+            <div id="gradeBtnGroup" class="grid grid-cols-5 gap-1.5"></div>
           </div>
 
           <button type="button" onclick="saveProfileAndNext()"
@@ -344,9 +322,7 @@
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- SCREEN 2: SUBJECT SELECTION                                         -->
-      <!-- =================================================================== -->
+      <!-- SCREEN 2: SUBJECT SELECTION -->
       <section id="screen2" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
         <div class="cream-card w-full max-w-lg border-2 border-orange-300 p-4 flex flex-col gap-3">
           <div class="text-center">
@@ -378,9 +354,7 @@
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- SCREEN 3: DOMAIN & LEVEL SELECTION                                  -->
-      <!-- =================================================================== -->
+      <!-- SCREEN 3: DOMAIN & LEVEL SELECTION -->
       <section id="screen3" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
         <div class="cream-card w-full max-w-lg border-2 border-teal-400 p-3.5 sm:p-4 flex flex-col gap-2.5 max-h-full overflow-y-auto thin-scroll">
           <div class="flex items-center justify-between gap-2 border-b border-amber-200 pb-2">
@@ -390,24 +364,18 @@
             </span>
           </div>
 
-          <!-- Domains Grid -->
           <div>
             <div class="text-xs font-extrabold text-slate-600 mb-1.5">१. अध्ययन क्षेत्र निवडा :</div>
-            <div id="domainButtonsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-              <!-- Populated by JS -->
-            </div>
+            <div id="domainButtonsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
           </div>
 
-          <!-- Level Dropdown -->
           <div>
             <label for="levelSelect" class="block text-xs font-extrabold text-slate-600 mb-1">२. अध्ययन स्तर निवडा (SCERT जोडपत्र-१) :</label>
             <select id="levelSelect" onchange="onLevelChange(this.value)"
               class="w-full px-3 py-2.5 rounded-xl border-2 border-teal-400 bg-white text-xs sm:text-sm font-bold text-slate-900 outline-none">
-              <!-- Populated by JS -->
             </select>
           </div>
 
-          <!-- Action Buttons -->
           <div class="grid grid-cols-2 gap-2 pt-1">
             <button type="button" onclick="startPractice('PRACTICE')"
               class="touch-btn py-2.5 px-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-extrabold text-xs sm:text-sm shadow-md">
@@ -421,18 +389,12 @@
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- SCREEN 4: DISTRACTION-FREE PRACTICE / ASSESSMENT                    -->
-      <!-- =================================================================== -->
+      <!-- SCREEN 4: PRACTICE / ASSESSMENT -->
       <section id="screen4" class="hidden flex-1 min-h-0 flex flex-col">
-        <div id="practiceWorkspace" class="flex-1 min-h-0 flex flex-col">
-          <!-- Dynamically populated by renderScreen4() -->
-        </div>
+        <div id="practiceWorkspace" class="flex-1 min-h-0 flex flex-col"></div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- TEACHER DASHBOARD (Via Role Dropdown)                               -->
-      <!-- =================================================================== -->
+      <!-- TEACHER DASHBOARD -->
       <section id="screenTeacher" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
         <div class="cream-card w-full max-w-lg border-2 border-teal-500 p-4 flex flex-col gap-3 max-h-full overflow-y-auto thin-scroll">
           <div class="flex items-center justify-between border-b border-teal-200 pb-2">
@@ -469,7 +431,6 @@
             </div>
           </div>
 
-          <!-- 10-Image IndexedDB Gallery Manager Card -->
           <div class="p-3 rounded-xl bg-amber-50 border border-amber-300 flex flex-wrap items-center justify-between gap-2 text-xs">
             <div>
               <div class="font-extrabold text-amber-950">🖼️ मौखिक भाषा चित्र गॅलरी (१० चित्रे • ऑफलाइन)</div>
@@ -489,9 +450,7 @@
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- PARENT DASHBOARD (Via Role Dropdown)                                -->
-      <!-- =================================================================== -->
+      <!-- PARENT DASHBOARD -->
       <section id="screenParent" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
         <div class="cream-card w-full max-w-lg border-2 border-orange-400 p-4 flex flex-col gap-3 max-h-full overflow-y-auto thin-scroll">
           <div class="flex items-center justify-between border-b border-orange-200 pb-2">
@@ -526,9 +485,7 @@
 
     </main>
 
-    <!-- ===================================================================== -->
-    <!-- 3. FIXED TWO-LINE FOOTER ON EVERY SCREEN                              -->
-    <!-- ===================================================================== -->
+    <!-- 3. FIXED TWO-LINE FOOTER -->
     <footer class="app-footer">
       <div class="font-extrabold text-amber-300 truncate">
         संकल्पना व निर्मिती : श्री. डी. के. देऊरमले (स. शिक्षक)
@@ -538,20 +495,16 @@
       </div>
     </footer>
 
-    <!-- ===================================================================== -->
-    <!-- 4. TOAST MESSAGE BOX (Replaces alert/confirm)                         -->
-    <!-- ===================================================================== -->
+    <!-- 4. TOAST MESSAGE BOX -->
     <div id="toastBox" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900/95 text-white text-xs font-extrabold shadow-xl border border-amber-400 max-w-[92%] text-center">
     </div>
 
-    <!-- Hidden File Inputs -->
+    <!-- Hidden File Inputs (Fixed: Camera + Gallery both work) -->
     <input id="bulkOralImgInput" type="file" accept="image/*" multiple class="hidden" onchange="handleBulkOralUpload(event)" />
     <input id="singleOralImgInput" type="file" accept="image/*" class="hidden" onchange="handleSingleOralUpload(event)" />
-    <input id="ocrFileInput" type="file" accept="image/*"class="hidden" onchange="handleOcrUpload(event)" />
+    <input id="ocrFileInput" type="file" accept="image/*" class="hidden" onchange="handleOcrUpload(event)" />
 
-    <!-- ===================================================================== -->
-    <!-- 5. 10-IMAGE OFFLINE GALLERY MODAL                                     -->
-    <!-- ===================================================================== -->
+    <!-- 5. 10-IMAGE OFFLINE GALLERY MODAL -->
     <div id="galleryModal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
       <div class="cream-card w-full max-w-2xl max-h-[90dvh] flex flex-col overflow-hidden border-2 border-teal-500">
         <div class="shrink-0 bg-gradient-to-r from-teal-800 to-emerald-700 text-white px-3.5 py-2.5 flex items-center justify-between gap-2">
@@ -583,13 +536,8 @@
 
   </div>
 
-  <!-- ======================================================================= -->
-  <!-- COMPLETE APPLICATION LOGIC (STRICTLY INSIDE ONE VALID <script> TAG)     -->
-  <!-- ======================================================================= -->
+  <!-- COMPLETE APPLICATION LOGIC -->
   <script>
-    // -------------------------------------------------------------------------
-    // 1. UTILITIES & MARATHI DIGITS
-    // -------------------------------------------------------------------------
     const MR_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
     function toMr(num) {
       return String(num).replace(/\d/g, d => MR_DIGITS[Number(d)]);
@@ -605,11 +553,8 @@
       toastTimer = setTimeout(() => box.classList.add('hidden'), ms);
     }
 
-    // -------------------------------------------------------------------------
-    // 2. APPLICATION STATE (Persisted in localStorage)
-    // -------------------------------------------------------------------------
     const state = {
-      screen: 0, // 0:Welcome, 1:Login, 2:Subject, 3:Domain/Level, 4:Practice
+      screen: 0,
       role: 'STUDENT',
       studentName: '',
       schoolName: 'जिल्हा परिषद प्राथमिक शाळा ईळदा',
@@ -657,9 +602,6 @@
       }
     }
 
-    // -------------------------------------------------------------------------
-    // 3. OFFICIAL NIPUN MAHARASHTRA 2026-27 (ANNEXURE-1) CURRICULUM
-    // -------------------------------------------------------------------------
     const CURRICULUM = {
       MARATHI: {
         1: {
@@ -821,9 +763,6 @@
       return CURRICULUM[subject][gKey];
     }
 
-    // -------------------------------------------------------------------------
-    // 4. 10 EXCLUSIVE ORAL LANGUAGE SCENES + PERMANENT INDEXEDDB STORAGE
-    // -------------------------------------------------------------------------
     const ORAL_HD_PHOTOS = [
       {
         id: 'shet', matchKey: '1000713536', title: 'गावातील शेत', emoji: '🌾', bg: '#DCFCE7',
@@ -1112,9 +1051,6 @@
       }).join('');
     }
 
-    // -------------------------------------------------------------------------
-    // 5. NON-PICTURE ORAL LANGUAGE DATASETS (20 ITEMS EACH)
-    // -------------------------------------------------------------------------
     const ORAL_RHYMES_G1 = [
       { title: 'ये रे ये रे पावसा', lines: 'ये रे ये रे पावसा, तुला देतो पैसा,\nपैसा झाला खोटा, पाऊस आला मोठा!' },
       { title: 'अडगुलं मडगुलं', lines: 'अडगुलं मडगुलं सोन्याचं कडगुलं,\nरुप्याचा वाळा तान्ह्या बाळा!' },
@@ -1197,9 +1133,6 @@
       { text: 'आजचा वार कोणता आहे ते मोठ्याने सांगा.', choices: ['📅 वार सांगितला', '🌧️ पाऊस म्हटले', '🍎 फळ म्हटले'], ans: 0 }
     ];
 
-    // -------------------------------------------------------------------------
-    // 6. READING & WRITING CONTENT GENERATOR (20 ITEMS PER LEVEL)
-    // -------------------------------------------------------------------------
     function getReadingItems(grade, levelNum) {
       const bank = {
         letters: ['क', 'म', 'ल', 'न', 'र', 'स', 'ग', 'प', 'ब', 'त', 'व', 'ह', 'द', 'ज', 'च', 'अ', 'आ', 'इ', 'ई', 'उ'],
@@ -1236,16 +1169,12 @@
         if (levelNum <= 5) return bank.shortSent;
         return Array.from({ length: 20 }, (_, i) => bank.longPassages[i % bank.longPassages.length]);
       }
-      // Grades 3-5
       if (levelNum === 1) return bank.letters;
       if (levelNum === 2) return bank.jodakshar;
       if (levelNum <= 4) return bank.shortSent;
       return Array.from({ length: 20 }, (_, i) => bank.longPassages[i % bank.longPassages.length]);
     }
 
-    // -------------------------------------------------------------------------
-    // 7. MATHEMATICS 20-QUESTION GENERATOR PER DOMAIN & LEVEL
-    // -------------------------------------------------------------------------
     function getMathQuestion(grade, domain, levelNum, qIdx) {
       const seed = (grade * 100) + (levelNum * 25) + qIdx;
 
@@ -1307,7 +1236,6 @@
         return { q: `${toMr(n)} या संख्येच्या लगतची पुढची संख्या कोणती?`, opts, ans: 0 };
       }
 
-      // Default: संख्यांवरील क्रिया (Addition / Subtraction / Multiplication)
       const isSub = (levelNum % 2 === 0);
       const limit = grade === 1 ? 9 : (grade === 2 ? 45 : 250);
       const a = ((qIdx + 3) * (grade === 3 ? 11 : 2)) % limit + 3;
@@ -1335,7 +1263,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // 8. AUDIO, SPEECH SYNTHESIS & LIVE MIC RECORDING (MediaRecorder + ASR)
+    // 8. AUDIO, SPEECH SYNTHESIS & FIXED LIVE MIC RECOGNITION
     // -------------------------------------------------------------------------
     let mediaRecorder = null;
     let audioChunks = [];
@@ -1388,7 +1316,6 @@
       if (btnStop) btnStop.disabled = false;
       if (hint) hint.textContent = '🎙️ रेकॉर्डिंग सुरू आहे... मोठ्याने व स्पष्ट बोला.';
 
-      // Start SpeechRecognition (mr-IN) if supported
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SR) {
         try {
@@ -1406,12 +1333,17 @@
               hint.textContent = `🗣️ ऐकले: "${recognizedTranscript}"`;
             }
           };
+          recognition.onerror = () => {
+            if (hint && !recognizedTranscript) {
+              hint.textContent = '🎙️ आवाज ऐकू आला नाही. माईक परवानगी तपासा व पुन्हा बोला.';
+            }
+          };
           recognition.start();
         } catch (_) {}
       }
 
-      // Start MediaRecorder for Audio Playback
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Only run MediaRecorder for Oral mode so it doesn't block SpeechRecognition mic on Android
+      if (isOral && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           mediaRecorder = new MediaRecorder(stream);
@@ -1426,9 +1358,7 @@
             stream.getTracks().forEach(t => t.stop());
           };
           mediaRecorder.start();
-        } catch (_) {
-          if (!SR && hint) hint.textContent = '🎙️ माईक परवानगी द्या किंवा मोठ्याने सराव करा.';
-        }
+        } catch (_) {}
       }
     }
 
@@ -1463,32 +1393,47 @@
       if (btnStop) btnStop.disabled = true;
 
       const qKey = `${state.grade}_${state.subject}_${state.domain}_${state.levelNum}_${state.qIdx}`;
-      markQuestionSolved(qKey);
 
       if (isOral) {
+        markQuestionSolved(qKey);
         if (hint) hint.textContent = '🌟 शाब्बास! छान बोललास! (+५ तारे)';
         showToast('🌟 छान प्रयत्न! +५ तारे मिळाले!');
         return;
       }
 
-      // Calculate reading accuracy
-      const targetWords = targetText.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
-      const spokenWords = recognizedTranscript.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
+      // FIXED: Real accuracy calculation (No hardcoded 85%)
+      const cleanStr = (s) => (s || '').replace(/[.,!?।\-'"()]/g, '').trim().split(/\s+/).filter(Boolean);
+      const targetWords = cleanStr(targetText);
+      const spokenWords = cleanStr(recognizedTranscript);
+
+      if (spokenWords.length === 0) {
+        if (hint) {
+          hint.textContent = '⚠️ आवाज स्पष्ट ऐकू आला नाही (अचूकता: ०%). कृपया मोठ्याने पुन्हा वाचा.';
+        }
+        showToast('⚠️ आवाज ऐकू आला नाही. पुन्हा प्रयत्न करा!');
+        return;
+      }
+
       let matched = 0;
       targetWords.forEach(w => {
-        if (spokenWords.some(sw => sw.includes(w) || w.includes(sw))) matched++;
+        if (spokenWords.some(sw => sw === w || (w.length > 1 && (sw.includes(w) || w.includes(sw))))) {
+          matched++;
+        }
       });
-      const pct = recognizedTranscript ? Math.round((matched / Math.max(1, targetWords.length)) * 100) : 85;
-      if (hint) {
-        hint.textContent = pct >= 80
-          ? `🟢 अचूकता ${toMr(pct)}% • निपुण वाचन! (+५ तारे)`
-          : `🟡 अचूकता ${toMr(pct)}% • खूप छान प्रयत्न! पुन्हा एकदा वाचून पहा.`;
+
+      const pct = Math.round((matched / Math.max(1, targetWords.length)) * 100);
+      if (pct >= 80) {
+        markQuestionSolved(qKey);
+        if (hint) hint.textContent = `🟢 अचूकता ${toMr(pct)}% • निपुण वाचन! (+५ तारे)`;
+        showToast(`🌟 निपुण वाचन! अचूकता: ${toMr(pct)}%`);
+      } else {
+        if (hint) hint.textContent = `🟡 अचूकता ${toMr(pct)}% • ऐकले: "${recognizedTranscript}" • पुन्हा प्रयत्न करा.`;
+        showToast(`🎙️ अचूकता: ${toMr(pct)}% — पुन्हा वाचून पहा!`);
       }
-      showToast(`🎙️ वाचन पूर्ण! अचूकता: ${toMr(pct)}%`);
     }
 
     // -------------------------------------------------------------------------
-    // 9. GRADE 1 DIGITAL SLATE (पाटी) & GRADES 2-5 TESSERACT MARATHI OCR
+    // 9. GRADE 1 DIGITAL SLATE & FIXED GRADES 2-5 PHOTO PREVIEW + OCR
     // -------------------------------------------------------------------------
     function initGrade1Slate() {
       const canvas = document.getElementById('slateCanvas');
@@ -1536,10 +1481,20 @@
     async function handleOcrUpload(event) {
       const file = event.target && event.target.files && event.target.files[0];
       if (!file) return;
+
       const resBox = document.getElementById('ocrResultBox');
+      const imgUrl = URL.createObjectURL(file);
+
       if (resBox) {
         resBox.classList.remove('hidden');
-        resBox.innerHTML = '<div class="text-teal-800 font-extrabold">⏳ मराठी OCR तपासणी सुरू आहे... कृपया थांबा.</div>';
+        resBox.innerHTML = `
+          <div class="flex items-center gap-2 text-left">
+            <img src="${imgUrl}" alt="वहीचा फोटो" class="w-16 h-16 object-cover rounded-lg border-2 border-teal-400 shrink-0" />
+            <div class="text-teal-800 font-extrabold text-xs">
+              ✅ फोटो अपलोड झाला!<br/>⏳ मराठी OCR तपासणी सुरू आहे... कृपया थांबा.
+            </div>
+          </div>
+        `;
       }
 
       try {
@@ -1548,8 +1503,8 @@
         }
         const { data: { text } } = await Tesseract.recognize(file, 'mar');
         const cleanedOcr = (text || '').replace(/\s+/g, ' ').trim();
-        const targetWords = currentOcrTarget.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
-        const ocrWords = cleanedOcr.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
+        const targetWords = currentOcrTarget.replace(/[.,!?।]/g, '').split(/\s+/).filter(Boolean);
+        const ocrWords = cleanedOcr.replace(/[.,!?।]/g, '').split(/\s+/).filter(Boolean);
 
         let matched = 0;
         targetWords.forEach(w => {
@@ -1562,15 +1517,27 @@
         }
         if (resBox) {
           resBox.innerHTML = `
-            <div class="font-extrabold ${isNipun ? 'text-emerald-700' : 'text-amber-700'}">
-              ${isNipun ? '🟢 निपुण प्राप्त!' : '🟡 पुन्हा सराव करा'} • अचूकता: ${toMr(pct)}% (निकष: ८०%)
+            <div class="flex items-center gap-2.5 text-left">
+              <img src="${imgUrl}" alt="वहीचा फोटो" class="w-16 h-16 object-cover rounded-lg border-2 ${isNipun ? 'border-emerald-500' : 'border-amber-400'} shrink-0" />
+              <div class="min-w-0">
+                <div class="font-extrabold text-xs ${isNipun ? 'text-emerald-700' : 'text-amber-700'}">
+                  ${isNipun ? '🟢 निपुण प्राप्त!' : '🟡 पुन्हा सराव करा'} • अचूकता: ${toMr(pct)}%
+                </div>
+                <div class="text-[10.5px] text-slate-600 truncate mt-0.5">OCR मजकूर: ${cleanedOcr || 'स्पष्ट अक्षर आढळले नाही'}</div>
+              </div>
             </div>
-            <div class="text-[10.5px] text-slate-600 truncate mt-0.5">OCR मजकूर: ${cleanedOcr || 'स्पष्ट अक्षर आढळले नाही'}</div>
           `;
         }
       } catch (_) {
         if (resBox) {
-          resBox.innerHTML = '<div class="text-amber-800 font-extrabold">⚠️ ऑफलाइन मोड: इंटरनेट उपलब्ध झाल्यावर OCR तपासणी होईल.</div>';
+          resBox.innerHTML = `
+            <div class="flex items-center gap-2.5 text-left">
+              <img src="${imgUrl}" alt="वहीचा फोटो" class="w-16 h-16 object-cover rounded-lg border-2 border-amber-400 shrink-0" />
+              <div class="text-amber-800 font-extrabold text-xs">
+                ✅ फोटो अपलोड झाला!<br/>⚠️ ऑफलाइन मोड: इंटरनेट सुरू झाल्यावर OCR तपासणी होईल.
+              </div>
+            </div>
+          `;
         }
       }
     }
@@ -1585,7 +1552,6 @@
       const roleSel = document.getElementById('roleSelect');
       if (roleSel) roleSel.value = 'STUDENT';
 
-      // Hide all sections
       ['screen0', 'screen1', 'screen2', 'screen3', 'screen4', 'screenTeacher', 'screenParent'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -1601,7 +1567,6 @@
         document.getElementById('screen' + num).classList.remove('hidden');
       }
 
-      // Highlight active nav pill
       [0, 1, 2, 3].forEach(i => {
         const btn = document.getElementById('navBtn' + i);
         if (btn) btn.classList.toggle('active', (num - 1) === i);
@@ -1758,19 +1723,15 @@
       goToScreen(4);
     }
 
-    // -------------------------------------------------------------------------
-    // 11. SCREEN 4: SPECIALIZED PRACTICE WORKSPACE (20 QUESTIONS PER LEVEL)
-    // -------------------------------------------------------------------------
     function renderScreen4() {
       const ws = document.getElementById('practiceWorkspace');
       const qNo = state.qIdx + 1;
       const modeLabel = state.mode === 'ASSESSMENT' ? '✅ चाचणी' : '🎯 सराव';
 
-      // A. MARATHI -> ORAL LANGUAGE (मौखिक भाषा)
+      // A. MARATHI -> ORAL LANGUAGE
       if (state.subject === 'MARATHI' && state.domain === 'मौखिक भाषा') {
         const isPictureLevel = (state.grade === 1 && (state.levelNum === 1 || state.levelNum === 2)) || (state.grade === 2 && state.levelNum === 3);
 
-        // A1. PICTURE-BASED LEVELS ONLY (G1 L1, G1 L2, G2 L3)
         if (isPictureLevel) {
           const photo = ORAL_HD_PHOTOS[state.qIdx % ORAL_HD_PHOTOS.length];
           const isSecondPass = state.qIdx >= ORAL_HD_PHOTOS.length;
@@ -1834,7 +1795,6 @@
           return;
         }
 
-        // A2. NON-PICTURE: G1 L3 (बडबडगीते) & G2 L1 (कविता)
         if ((state.grade === 1 && state.levelNum === 3) || (state.grade === 2 && state.levelNum === 1)) {
           const item = (state.grade === 1 ? ORAL_RHYMES_G1 : ORAL_POEMS_G2)[state.qIdx % 20];
           const safeLines = item.lines.replace(/\n/g, ' ');
@@ -1869,7 +1829,6 @@
           return;
         }
 
-        // A3. NON-PICTURE: G2 L2 (शब्द पुनरावृत्ती)
         if (state.grade === 2 && state.levelNum === 2) {
           const words = ORAL_WORD_ECHO_G2[state.qIdx % 20];
           const joined = words.join(', ');
@@ -1907,7 +1866,6 @@
           return;
         }
 
-        // A4. NON-PICTURE: G2 L4 (शिक्षकांच्या सूचनांचे पालन)
         const inst = ORAL_INSTRUCTIONS_G2[state.qIdx % 20];
         ws.innerHTML = `
           <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2.5 border-2 border-teal-400">
@@ -1939,7 +1897,7 @@
         return;
       }
 
-      // B. MARATHI -> READING (वाचन)
+      // B. MARATHI -> READING
       if (state.subject === 'MARATHI' && state.domain === 'वाचन') {
         const items = getReadingItems(state.grade, state.levelNum);
         const text = items[state.qIdx % items.length];
@@ -1964,7 +1922,6 @@
               <audio id="recPlayer" controls class="hidden h-6 max-w-[175px]"></audio>
             </div>
 
-            <!-- Compact 4-Button Single Row -->
             <div class="shrink-0 audio-grid-4">
               <button type="button" onclick="speakMarathi(\`${safeText}\`, 0.85)" class="audio-ctrl-btn bg-amber-500 text-white"><span>🔊</span><span>वाक्य ऐका</span></button>
               <button id="btnRecStart" type="button" onclick="startMic(\`${safeText}\`, false)" class="audio-ctrl-btn bg-emerald-600 text-white"><span>🎙️</span><span>सुरू करा</span></button>
@@ -1979,13 +1936,12 @@
         return;
       }
 
-      // C. MARATHI -> WRITING (लेखन)
+      // C. MARATHI -> WRITING
       if (state.subject === 'MARATHI' && state.domain === 'लेखन') {
         const items = getReadingItems(state.grade, state.levelNum);
         const text = items[state.qIdx % items.length];
         const safeText = text.replace(/`/g, '');
 
-        // C1. GRADE 1 ONLY: DIGITAL SLATE (पाटी)
         if (state.grade === 1) {
           ws.innerHTML = `
             <div class="cream-card flex-1 flex flex-col min-h-0 p-2.5 gap-2 border-2 border-orange-400">
@@ -2015,7 +1971,6 @@
           return;
         }
 
-        // C2. GRADES 2-5: NO SLATE — DICTATION AUDIO + TESSERACT MARATHI OCR
         ws.innerHTML = `
           <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2 border-2 border-teal-400">
             <div class="shrink-0 flex items-center justify-between">
@@ -2034,7 +1989,7 @@
 
             <button type="button" onclick="triggerOcrUpload(\`${safeText}\`)"
               class="touch-btn shrink-0 w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs sm:text-sm font-extrabold shadow-md">
-              📷 वहीचा फोटो अपलोड करा (मराठी OCR तपासणी)
+              📷 वहीचा फोटो अपलोड करा (कॅमेरा / गॅलरी)
             </button>
 
             <div id="ocrResultBox" class="hidden shrink-0 p-2 rounded-xl bg-teal-50 border border-teal-300 text-center text-xs"></div>
@@ -2042,7 +1997,7 @@
         return;
       }
 
-      // D. MATHEMATICS (गणित) — 20 INTERACTIVE MCQ QUESTIONS
+      // D. MATHEMATICS
       const mq = getMathQuestion(state.grade, state.domain, state.levelNum, state.qIdx);
       ws.innerHTML = `
         <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2.5 border-2 border-teal-400">
@@ -2091,9 +2046,6 @@
       }
     }
 
-    // -------------------------------------------------------------------------
-    // 12. TEACHER & PARENT DASHBOARDS
-    // -------------------------------------------------------------------------
     function renderTeacher() {
       document.getElementById('teacherSchoolSub').textContent = state.schoolName || 'जिल्हा परिषद प्राथमिक शाळा ईळदा';
       document.getElementById('teacherStuName').textContent = `विद्यार्थी: ${state.studentName || 'नोंदवलेले नाही'} (इयत्ता ${toMr(state.grade)})`;
@@ -2115,9 +2067,6 @@
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     }
 
-    // -------------------------------------------------------------------------
-    // 13. OFFLINE PWA MANIFEST & SERVICE WORKER
-    // -------------------------------------------------------------------------
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -2130,45 +2079,12 @@
         await deferredPrompt.userChoice;
         deferredPrompt = null;
       } else {
-        showToast('📲 ब्राउझर मेनूमधून "Add to Home Screen" निवडा!');
+        showToast('📲 ब्राउझर मेनूमधून "Install app" निवडा!');
       }
     }
 
-    function registerInlinePWA() {
-      try {
-        const manifest = {
-          name: 'निपुण बालमित्र 2.0',
-          short_name: 'निपुण बालमित्र',
-          description: 'सरावातून निपुणतेकडे - निपुण महाराष्ट्र २०२६-२७ सराव अँप',
-          start_url: './',
-          display: 'standalone',
-          background_color: '#FFFDF7',
-          theme_color: '#0F766E'
-        };
-        const mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        link.href = URL.createObjectURL(mBlob);
-        document.head.appendChild(link);
-
-        if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-          const swCode = `
-            self.addEventListener('install', e => self.skipWaiting());
-            self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-            self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-          `;
-          const swBlob = new Blob([swCode], { type: 'application/javascript' });
-          navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
-        }
-      } catch (_) {}
-    }
-
-    // -------------------------------------------------------------------------
-    // 14. INITIALIZE APP
-    // -------------------------------------------------------------------------
     window.addEventListener('DOMContentLoaded', () => {
       loadSavedState();
-      registerInlinePWA();
       loadAllImagesFromIDB();
       goToScreen(0);
     });
