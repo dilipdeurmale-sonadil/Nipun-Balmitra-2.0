@@ -1447,6 +1447,47 @@
       }
     }
 
+    function checkGboardReading(targetText) {
+      const inp = document.getElementById('gboardReadInput');
+      const hint = document.getElementById('readHint');
+      const spoken = (inp && inp.value ? inp.value : '').trim();
+      if (!spoken) {
+        showToast('⌨️ आधी बॉक्सवर टॅप करून कीबोर्डच्या माईकने (🎙️) बोला!');
+        if (inp) inp.focus();
+        return;
+      }
+
+      const cleanStr = (s) => (s || '').replace(/[.,!?।\-'"()]/g, '').trim().split(/\s+/).filter(Boolean);
+      const targetWords = cleanStr(targetText);
+      const spokenWords = cleanStr(spoken);
+
+      let matched = 0;
+      targetWords.forEach(w => {
+        if (spokenWords.some(sw => sw === w || (w.length > 1 && sw.includes(w)))) {
+          matched++;
+        }
+      });
+
+      const pct = Math.round((matched / Math.max(1, targetWords.length)) * 100);
+      const qKey = `${state.grade}_${state.subject}_${state.domain}_${state.levelNum}_${state.qIdx}`;
+      if (pct >= 80) {
+        markQuestionSolved(qKey);
+        if (hint) hint.textContent = `🟢 अचूकता ${toMr(pct)}% • निपुण वाचन! (+५ तारे)`;
+        showToast(`🌟 निपुण वाचन! अचूकता: ${toMr(pct)}%`);
+      } else {
+        if (hint) hint.textContent = `🟡 अचूकता ${toMr(pct)}% • तुमचे वाचन: "${spoken}" • पुन्हा प्रयत्न करा.`;
+        showToast(`🎙️ अचूकता: ${toMr(pct)}% — पुन्हा वाचून पहा!`);
+      }
+    }
+
+    function selfCheckReading() {
+      const hint = document.getElementById('readHint');
+      const qKey = `${state.grade}_${state.subject}_${state.domain}_${state.levelNum}_${state.qIdx}`;
+      markQuestionSolved(qKey);
+      if (hint) hint.textContent = '🟢 स्वयं-तपासणी पूर्ण • अचूक वाचन! (+५ तारे) पुढे जाण्यासाठी ➡️ दाबा.';
+      showToast('🌟 शाब्बास! स्वयं-तपासणी पूर्ण (+५ तारे)');
+    }
+
     // -------------------------------------------------------------------------
     // 9. GRADE 1 DIGITAL SLATE & FIXED GRADES 2-5 PHOTO PREVIEW + OCR
     // -------------------------------------------------------------------------
@@ -1880,8 +1921,22 @@
                 <button id="btnRecStop" type="button" onclick="finishMic('${joined}', false)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>बंद करा</span></button>
               </div>
 
-              <div id="readHint" class="shrink-0 px-2 py-1 rounded-lg bg-teal-50 border border-teal-200 text-center text-[11px] font-extrabold text-teal-950">
-                🗣️ शब्द ऐका आणि मोठ्याने पुन्हा म्हणा.
+              <div class="shrink-0 flex items-center gap-1.5">
+                <input id="gboardReadInput" type="text" placeholder="⌨️ कीबोर्ड माईकने (🎙️) शब्द बोला..."
+                  onkeydown="if(event.key==='Enter') checkGboardReading('${joined}')"
+                  class="flex-1 min-w-0 px-2.5 py-1.5 rounded-xl border-2 border-teal-300 focus:border-orange-500 outline-none text-xs font-bold bg-white" />
+                <button type="button" onclick="checkGboardReading('${joined}')"
+                  class="touch-btn shrink-0 px-2.5 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold shadow">
+                  ✅ तपासा
+                </button>
+                <button type="button" onclick="selfCheckReading()" title="शिक्षक / पालक स्वयं-तपासणी"
+                  class="touch-btn shrink-0 px-2 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 text-[11px] font-extrabold">
+                  👍 बरोबर
+                </button>
+              </div>
+
+              <div id="readHint" class="shrink-0 px-2 py-1 rounded-lg bg-teal-50 border border-teal-200 text-center text-[11px] font-extrabold text-teal-950 truncate">
+                🗣️ शब्द ऐका आणि माईक किंवा कीबोर्ड माईकने पुन्हा म्हणा.
               </div>
             </div>`;
           return;
@@ -1950,8 +2005,23 @@
               <button id="btnRecStop" type="button" onclick="finishMic(\`${safeText}\`, false)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>बंद करा</span></button>
             </div>
 
+            <!-- Alternative: Gboard Voice Mic + Self-Check -->
+            <div class="shrink-0 flex items-center gap-1.5">
+              <input id="gboardReadInput" type="text" placeholder="⌨️ कीबोर्ड माईकने (🎙️) येथे बोला..."
+                onkeydown="if(event.key==='Enter') checkGboardReading(\`${safeText}\`)"
+                class="flex-1 min-w-0 px-2.5 py-1.5 rounded-xl border-2 border-teal-300 focus:border-orange-500 outline-none text-xs font-bold bg-white" />
+              <button type="button" onclick="checkGboardReading(\`${safeText}\`)"
+                class="touch-btn shrink-0 px-2.5 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold shadow">
+                ✅ तपासा
+              </button>
+              <button type="button" onclick="selfCheckReading()" title="शिक्षक / पालक स्वयं-तपासणी"
+                class="touch-btn shrink-0 px-2 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 text-[11px] font-extrabold">
+                👍 बरोबर
+              </button>
+            </div>
+
             <div id="readHint" class="shrink-0 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-center text-[11px] font-extrabold text-teal-950 truncate">
-              🎙️ 'सुरू करा' दाबून वरील मजकूर मोठ्याने वाचा.
+              🎙️ 'सुरू करा' किंवा खालील कीबोर्ड माईक बॉक्सने वाचन तपासा.
             </div>
           </div>`;
         return;
