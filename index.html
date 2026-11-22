@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0F766E" />
+  <title>निपुण बालमित्र 2.0 - सरावातून निपुणतेकडे</title>
+
+  <!-- Google Font: Noto Sans Devanagari -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tesseract.js for Marathi Handwriting OCR (Grades 2-5) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+
+  <style>
+    :root {
+      --saffron: #EA580C;
+      --saffron-light: #FFF7ED;
+      --teal: #0F766E;
+      --teal-light: #F0FDFA;
+      --cream: #FFFDF7;
+      --navy: #0F172A;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100dvh;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Noto Sans Devanagari', sans-serif;
+      background: linear-gradient(155deg, #FFF7ED 0%, #FFFDF7 48%, #CCFBF1 100%);
+      color: var(--navy);
+    }
+
+    /* App Shell: Zero-Scroll 100dvh Flex Container */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Cream Classroom Card */
+    .cream-card {
+      background: var(--cream);
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 118, 110, 0.08);
+    }
+
+    /* Touch-friendly interactive buttons */
+    .touch-btn {
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .touch-btn:active {
+      transform: scale(0.96);
+    }
+    .touch-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Single-Row 6-Button Navigation Bar (Fits cleanly even on 360px screens) */
+    .nav-row-6 {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 4px;
+      width: 100%;
+    }
+    .nav-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 2px;
+      border-radius: 10px;
+      font-size: 10.5px;
+      line-height: 1.15;
+      font-weight: 800;
+      border: 1.5px solid #FED7AA;
+      background: #FFFFFF;
+      color: #0F172A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-pill.active {
+      background: linear-gradient(135deg, #EA580C, #C2410C);
+      color: #FFFFFF;
+      border-color: #9A3412;
+      box-shadow: 0 2px 6px rgba(234, 88, 12, 0.35);
+    }
+    .nav-pill.nav-action {
+      background: #F0FDFA;
+      border-color: #99F6E4;
+      color: #0F766E;
+    }
+
+    /* 4-Button Single Row for Audio/Mic Controls */
+    .audio-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      width: 100%;
+    }
+    .audio-ctrl-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      padding: 6px 4px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14);
+      transition: transform 0.12s ease;
+    }
+    .audio-ctrl-btn:active {
+      transform: scale(0.95);
+    }
+    .audio-ctrl-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Fixed Two-Line Footer with Safe Bottom Padding */
+    .app-footer {
+      flex-shrink: 0;
+      background: linear-gradient(90deg, #0F172A 0%, #134E4A 50%, #0F172A 100%);
+      border-top: 2px solid #EA580C;
+      text-align: center;
+      padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+      font-size: 11px;
+      line-height: 1.3;
+      z-index: 30;
+    }
+
+    /* Audio Waveform Animation */
+    .wave-bar {
+      width: 4px;
+      height: 6px;
+      border-radius: 999px;
+      background: #0F766E;
+      transition: height 0.12s ease;
+    }
+    .wave-active .wave-bar {
+      animation: wavePulse 0.6s infinite ease-in-out alternate;
+    }
+    .wave-active .wave-bar:nth-child(odd) {
+      animation-delay: 0.15s;
+      background: #EA580C;
+    }
+    .wave-active .wave-bar:nth-child(3n) {
+      animation-delay: 0.3s;
+    }
+    @keyframes wavePulse {
+      from { height: 5px; }
+      to { height: 18px; }
+    }
+
+    /* Digital Slate Canvas (Grade 1 Writing) */
+    .slate-canvas {
+      background: #1E293B;
+      border: 4px solid #B45309;
+      border-radius: 12px;
+      touch-action: none;
+      cursor: crosshair;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Custom subtle scrollbars only where strictly needed */
+    .thin-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .thin-scroll::-webkit-scrollbar-thumb {
+      background: rgba(15, 118, 110, 0.3);
+      border-radius: 99px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- ===================================================================== -->
+    <!-- 1. TOP HEADER & SINGLE-ROW 6-BUTTON NAV BAR (Hidden on Welcome)       -->
+    <!-- ===================================================================== -->
+    <header id="appHeader" class="hidden shrink-0 bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-800 text-white px-2.5 pt-2 pb-1.5 shadow-md z-20">
+      <div class="flex items-center justify-between gap-1.5 mb-1.5">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-sm shadow shrink-0">
+            ☀️
+          </div>
+          <div class="min-w-0 leading-tight">
+            <div class="font-extrabold text-xs sm:text-sm truncate">निपुण बालमित्र 2.0</div>
+            <div class="text-[9.5px] font-bold text-amber-200 truncate">सरावातून निपुणतेकडे</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <select id="roleSelect" onchange="switchRole(this.value)"
+            class="bg-white/95 text-slate-900 text-[11px] font-extrabold rounded-lg px-2 py-1 border border-amber-300 outline-none">
+            <option value="STUDENT">🎒 विद्यार्थी</option>
+            <option value="TEACHER">👩‍🏫 शिक्षक</option>
+            <option value="PARENT">👨‍👩‍👧 पालक</option>
+          </select>
+          <button id="btnInstallTop" type="button" onclick="installPWA()"
+            class="touch-btn px-2 py-1 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-[10.5px] font-extrabold shadow">
+            📲 इन्स्टॉल
+          </button>
+        </div>
+      </div>
+
+      <!-- Single-Row 6-Button Navigation Bar -->
+      <nav id="studentNavBar" class="nav-row-6" aria-label="मुख्य नेव्हिगेशन">
+        <button id="navBtn0" type="button" onclick="goToScreen(1)" class="touch-btn nav-pill">
+          <span>🏠</span><span>मुखपृष्ठ</span>
+        </button>
+        <button id="navBtn1" type="button" onclick="goToScreen(2)" class="touch-btn nav-pill">
+          <span>📚</span><span>विषय</span>
+        </button>
+        <button id="navBtn2" type="button" onclick="goToScreen(3)" class="touch-btn nav-pill">
+          <span>🧩</span><span>क्षेत्र</span>
+        </button>
+        <button id="navBtn3" type="button" onclick="goToScreen(4)" class="touch-btn nav-pill">
+          <span>🎯</span><span>स्तर</span>
+        </button>
+        <button id="navBtnPrev" type="button" onclick="handlePrevNav()" class="touch-btn nav-pill nav-action">
+          <span>⬅️</span><span>मागे</span>
+        </button>
+        <button id="navBtnNext" type="button" onclick="handleNextNav()" class="touch-btn nav-pill nav-action">
+          <span>➡️</span><span>पुढे</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- 2. MAIN VIEWPORT (Zero-Scroll Flex Area)                              -->
+    <!-- ===================================================================== -->
+    <main class="flex-1 min-h-0 flex flex-col p-2 sm:p-3 overflow-hidden relative">
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 0: WELCOME & मनोगत                                           -->
+      <!-- =================================================================== -->
+      <section id="screen0" class="flex-1 min-h-0 flex flex-col items-center justify-center">
+        <div class="cream-card w-full max-w-md border-2 border-orange-300 p-4 sm:p-5 flex flex-col items-center text-center gap-2.5 max-h-full overflow-y-auto thin-scroll">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-teal-600 flex items-center justify-center text-3xl shadow-lg border-2 border-white">
+            🌅
+          </div>
+
+          <span class="px-3 py-0.5 rounded-full bg-teal-50 border border-teal-300 text-teal-800 text-[11px] font-extrabold">
+            निपुण महाराष्ट्र अभियान २०२६-२७ • SCERT जोडपत्र-१
+          </span>
+
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-black text-orange-600 tracking-tight">निपुण बालमित्र 2.0</h1>
+            <p class="text-sm font-extrabold text-teal-700 mt-0.5">सरावातून निपुणतेकडे</p>
+          </div>
+
+          <div class="w-full p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-left text-xs sm:text-sm text-slate-800 leading-relaxed">
+            <div class="font-extrabold text-orange-700 mb-1">🙏 स्वागत व मनोगत :</div>
+            इयत्ता १ ली ते ५ वीच्या प्रत्येक विद्यार्थ्याने पायाभूत साक्षरता (मराठी भाषा) व संख्याज्ञान (गणित) यामधील अपेक्षित क्षमता आनंददायी व दररोजच्या सरावातून सहज आत्मसात कराव्यात, या उद्देशाने <strong>निपुण महाराष्ट्र २०२६-२७ (जोडपत्र-१)</strong> नुसार हे ऑफलाइन-सक्षम सराव अँप तयार केले आहे.
+          </div>
+
+          <div class="w-full p-2.5 rounded-xl bg-teal-50 border border-teal-200 text-xs">
+            <div class="font-extrabold text-teal-950">संकल्पना व निर्मिती : श्री. डी. के. देऊरमले (स. शिक्षक)</div>
+            <div class="font-bold text-teal-800">जिल्हा परिषद प्राथमिक शाळा ईळदा</div>
+          </div>
+
+          <button id="btnWelcomeStart" type="button" onclick="goToScreen(1)"
+            class="touch-btn w-full py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-extrabold text-sm sm:text-base shadow-md">
+            पुढे चला (विद्यार्थी लॉगिन) →
+          </button>
+
+          <button type="button" onclick="installPWA()"
+            class="touch-btn w-full py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs sm:text-sm shadow-sm">
+            📲 अँप इन्स्टॉल करा (ऑफलाइन वापरासाठी)
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 1: STUDENT LOGIN                                             -->
+      <!-- =================================================================== -->
+      <section id="screen1" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
+        <div class="cream-card w-full max-w-md border-2 border-teal-400 p-4 flex flex-col gap-3 max-h-full overflow-y-auto thin-scroll">
+          <div class="flex items-center justify-between border-b border-amber-200 pb-2">
+            <div>
+              <h2 class="text-base sm:text-lg font-black text-teal-900">🎒 विद्यार्थी माहिती नोंदणी</h2>
+              <p class="text-[11px] font-bold text-slate-500">इयत्ता १ ली ते ५ वी • निपुण महाराष्ट्र</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-extrabold">⭐ <span id="loginStarCount">०</span></span>
+          </div>
+
+          <div>
+            <label for="inpStudentName" class="block text-xs font-extrabold text-slate-700 mb-1">विद्यार्थ्याचे नाव :</label>
+            <input id="inpStudentName" type="text" placeholder="उदा. आरव पाटील"
+              class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 focus:border-teal-600 outline-none text-sm font-bold bg-white" />
+          </div>
+
+          <div>
+            <label for="inpSchoolName" class="block text-xs font-extrabold text-slate-700 mb-1">शाळेचे नाव :</label>
+            <input id="inpSchoolName" type="text" value="जिल्हा परिषद प्राथमिक शाळा ईळदा"
+              class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 focus:border-teal-600 outline-none text-sm font-bold bg-white" />
+          </div>
+
+          <div>
+            <div class="text-xs font-extrabold text-slate-700 mb-1.5">इयत्ता निवडा :</div>
+            <div id="gradeBtnGroup" class="grid grid-cols-5 gap-1.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <button type="button" onclick="saveProfileAndNext()"
+            class="touch-btn w-full py-3 mt-1 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-extrabold text-sm sm:text-base shadow-md">
+            पुढे (विषय निवडा) →
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 2: SUBJECT SELECTION                                         -->
+      <!-- =================================================================== -->
+      <section id="screen2" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
+        <div class="cream-card w-full max-w-lg border-2 border-orange-300 p-4 flex flex-col gap-3">
+          <div class="text-center">
+            <span id="subjStudentBadge" class="inline-block px-3 py-0.5 rounded-full bg-teal-100 text-teal-900 text-xs font-extrabold mb-1">
+              विद्यार्थी • इयत्ता १ ली
+            </span>
+            <h2 class="text-lg sm:text-xl font-black text-slate-900">📚 सरावासाठी विषय निवडा</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button type="button" onclick="selectSubject('MARATHI')"
+              class="touch-btn p-4 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white text-left shadow-lg border-2 border-orange-200 flex items-center sm:flex-col sm:text-center gap-3">
+              <div class="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center text-3xl shrink-0">📖</div>
+              <div>
+                <div class="text-lg sm:text-xl font-black">मराठी भाषा</div>
+                <div id="marathiSubDomainsHint" class="text-xs font-bold text-orange-50 mt-0.5">मौखिक भाषा • वाचन • लेखन</div>
+              </div>
+            </button>
+
+            <button type="button" onclick="selectSubject('MATH')"
+              class="touch-btn p-4 rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-600 text-white text-left shadow-lg border-2 border-teal-200 flex items-center sm:flex-col sm:text-center gap-3">
+              <div class="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center text-3xl shrink-0">🔢</div>
+              <div>
+                <div class="text-lg sm:text-xl font-black">गणित</div>
+                <div id="mathSubDomainsHint" class="text-xs font-bold text-teal-50 mt-0.5">संख्याज्ञान • क्रिया • आकार • मापन</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 3: DOMAIN & LEVEL SELECTION                                  -->
+      <!-- =================================================================== -->
+      <section id="screen3" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
+        <div class="cream-card w-full max-w-lg border-2 border-teal-400 p-3.5 sm:p-4 flex flex-col gap-2.5 max-h-full overflow-y-auto thin-scroll">
+          <div class="flex items-center justify-between gap-2 border-b border-amber-200 pb-2">
+            <h2 class="text-sm sm:text-base font-black text-teal-950">🧩 अध्ययन क्षेत्र व स्तर निवडा</h2>
+            <span id="domainHeaderBadge" class="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-900 text-[11px] font-extrabold shrink-0">
+              इयत्ता १ ली • मराठी
+            </span>
+          </div>
+
+          <!-- Domains Grid -->
+          <div>
+            <div class="text-xs font-extrabold text-slate-600 mb-1.5">१. अध्ययन क्षेत्र निवडा :</div>
+            <div id="domainButtonsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Level Dropdown -->
+          <div>
+            <label for="levelSelect" class="block text-xs font-extrabold text-slate-600 mb-1">२. अध्ययन स्तर निवडा (SCERT जोडपत्र-१) :</label>
+            <select id="levelSelect" onchange="onLevelChange(this.value)"
+              class="w-full px-3 py-2.5 rounded-xl border-2 border-teal-400 bg-white text-xs sm:text-sm font-bold text-slate-900 outline-none">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" onclick="startPractice('PRACTICE')"
+              class="touch-btn py-2.5 px-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-extrabold text-xs sm:text-sm shadow-md">
+              🎯 सराव करा (२० प्रश्न)
+            </button>
+            <button type="button" onclick="startPractice('ASSESSMENT')"
+              class="touch-btn py-2.5 px-2 rounded-xl bg-gradient-to-r from-teal-700 to-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md">
+              ✅ स्तर पडताळणी चाचणी
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 4: DISTRACTION-FREE PRACTICE / ASSESSMENT                    -->
+      <!-- =================================================================== -->
+      <section id="screen4" class="hidden flex-1 min-h-0 flex flex-col">
+        <div id="practiceWorkspace" class="flex-1 min-h-0 flex flex-col">
+          <!-- Dynamically populated by renderScreen4() -->
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TEACHER DASHBOARD (Via Role Dropdown)                               -->
+      <!-- =================================================================== -->
+      <section id="screenTeacher" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
+        <div class="cream-card w-full max-w-lg border-2 border-teal-500 p-4 flex flex-col gap-3 max-h-full overflow-y-auto thin-scroll">
+          <div class="flex items-center justify-between border-b border-teal-200 pb-2">
+            <div>
+              <h2 class="text-base sm:text-lg font-black text-teal-950">👩‍🏫 शिक्षक डॅशबोर्ड</h2>
+              <p id="teacherSchoolSub" class="text-xs font-bold text-teal-700">जिल्हा परिषद प्राथमिक शाळा ईळदा</p>
+            </div>
+            <span id="teacherRagBadge" class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold">🟡 प्रगतीपथावर</span>
+          </div>
+
+          <div class="p-3 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-between gap-2 text-xs">
+            <div>
+              <div class="font-extrabold text-teal-950" id="teacherStuName">विद्यार्थी: नोंदवलेले नाही</div>
+              <div class="font-bold text-teal-800 mt-0.5" id="teacherStuStats">पूर्ण प्रश्न: ० • तारे: ० • स्थिती: प्रगतीपथावर</div>
+            </div>
+            <button type="button" onclick="switchRole('STUDENT')"
+              class="touch-btn px-3 py-1.5 rounded-xl bg-orange-600 text-white font-extrabold shrink-0">
+              सरावाकडे जा →
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-300">
+              <div class="font-black text-emerald-700 text-base" id="tGreenCount">०</div>
+              <div class="font-bold text-emerald-900">🟢 निपुण</div>
+            </div>
+            <div class="p-2 rounded-xl bg-amber-50 border border-amber-300">
+              <div class="font-black text-amber-700 text-base" id="tYellowCount">१</div>
+              <div class="font-bold text-amber-900">🟡 प्रगतीपथावर</div>
+            </div>
+            <div class="p-2 rounded-xl bg-rose-50 border border-rose-300">
+              <div class="font-black text-rose-700 text-base" id="tRedCount">०</div>
+              <div class="font-bold text-rose-900">🔴 मदतीची गरज</div>
+            </div>
+          </div>
+
+          <!-- 10-Image IndexedDB Gallery Manager Card -->
+          <div class="p-3 rounded-xl bg-amber-50 border border-amber-300 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div>
+              <div class="font-extrabold text-amber-950">🖼️ मौखिक भाषा चित्र गॅलरी (१० चित्रे • ऑफलाइन)</div>
+              <div id="teacherGalleryCount" class="font-bold text-amber-800 mt-0.5">० / १० चित्रे कायमस्वरूपी जतन केली आहेत</div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="triggerBulkOralUpload()"
+                class="touch-btn px-2.5 py-1.5 rounded-lg bg-orange-600 text-white font-extrabold shadow-sm">
+                🖼️ १० चित्रे जोडा
+              </button>
+              <button type="button" onclick="openGalleryModal()"
+                class="touch-btn px-2.5 py-1.5 rounded-lg bg-teal-700 text-white font-extrabold shadow-sm">
+                ⚙️ गॅलरी
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- PARENT DASHBOARD (Via Role Dropdown)                                -->
+      <!-- =================================================================== -->
+      <section id="screenParent" class="hidden flex-1 min-h-0 flex flex-col items-center justify-center">
+        <div class="cream-card w-full max-w-lg border-2 border-orange-400 p-4 flex flex-col gap-3 max-h-full overflow-y-auto thin-scroll">
+          <div class="flex items-center justify-between border-b border-orange-200 pb-2">
+            <div>
+              <h2 class="text-base sm:text-lg font-black text-orange-900">👨‍👩‍👧 पालक सहभाग केंद्र</h2>
+              <p id="parentChildSub" class="text-xs font-bold text-slate-600">पाल्य: विद्यार्थी (इयत्ता १ ली)</p>
+            </div>
+            <button type="button" onclick="switchRole('STUDENT')"
+              class="touch-btn px-3 py-1.5 rounded-xl bg-teal-700 text-white text-xs font-extrabold">
+              सराव सुरू करा
+            </button>
+          </div>
+
+          <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-1.5">
+            <div class="font-extrabold text-orange-800">🏠 आजचा १० मिनिटांचा घरचा सराव :</div>
+            <p class="font-semibold text-slate-700">• पाल्यासोबत दररोज ५ मिनिटे मोठ्याने वाचन करा व चित्रावर गप्पा मारा.</p>
+            <p class="font-semibold text-slate-700">• घरातील वस्तू मोजणे व ₹१० ते ₹१०० च्या नोटांची ओळख करून द्या.</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2 text-xs">
+            <div>
+              <div class="font-extrabold text-emerald-950">📖 दैनिक वाचन आव्हान</div>
+              <div id="parentProgressText" class="font-bold text-emerald-800 mt-0.5">पूर्ण प्रश्न: ० • मिळालेले तारे: ० ⭐</div>
+            </div>
+            <button type="button" onclick="shareProgressWhatsApp()"
+              class="touch-btn px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shrink-0 shadow">
+              📲 WhatsApp शेअर
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- 3. FIXED TWO-LINE FOOTER ON EVERY SCREEN                              -->
+    <!-- ===================================================================== -->
+    <footer class="app-footer">
+      <div class="font-extrabold text-amber-300 truncate">
+        संकल्पना व निर्मिती : श्री. डी. के. देऊरमले (स. शिक्षक)
+      </div>
+      <div class="font-bold text-slate-100 truncate">
+        जिल्हा परिषद प्राथमिक शाळा ईळदा
+      </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- 4. TOAST MESSAGE BOX (Replaces alert/confirm)                         -->
+    <!-- ===================================================================== -->
+    <div id="toastBox" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900/95 text-white text-xs font-extrabold shadow-xl border border-amber-400 max-w-[92%] text-center">
+    </div>
+
+    <!-- Hidden File Inputs -->
+    <input id="bulkOralImgInput" type="file" accept="image/*" multiple class="hidden" onchange="handleBulkOralUpload(event)" />
+    <input id="singleOralImgInput" type="file" accept="image/*" class="hidden" onchange="handleSingleOralUpload(event)" />
+    <input id="ocrFileInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleOcrUpload(event)" />
+
+    <!-- ===================================================================== -->
+    <!-- 5. 10-IMAGE OFFLINE GALLERY MODAL                                     -->
+    <!-- ===================================================================== -->
+    <div id="galleryModal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+      <div class="cream-card w-full max-w-2xl max-h-[90dvh] flex flex-col overflow-hidden border-2 border-teal-500">
+        <div class="shrink-0 bg-gradient-to-r from-teal-800 to-emerald-700 text-white px-3.5 py-2.5 flex items-center justify-between gap-2">
+          <div>
+            <h3 class="font-extrabold text-sm sm:text-base">🖼️ चित्र गॅलरी व्यवस्थापन (ऑफलाइन IndexedDB)</h3>
+            <p id="galleryModalSummary" class="text-[11px] font-bold text-teal-100">० / १० चित्रे जतन केली आहेत</p>
+          </div>
+          <button type="button" onclick="closeGalleryModal()"
+            class="touch-btn w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white font-extrabold text-sm flex items-center justify-center">
+            ✕
+          </button>
+        </div>
+
+        <div class="shrink-0 px-3 py-2 bg-amber-50 border-b border-amber-200 flex flex-wrap items-center justify-between gap-2">
+          <button type="button" onclick="triggerBulkOralUpload()"
+            class="touch-btn px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm">
+            🖼️ १० चित्रे एकदाच जोडा (ऑटो-मॅच)
+          </button>
+          <button type="button" onclick="clearAllOralImagesFromIDB()"
+            class="touch-btn px-2.5 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs font-extrabold">
+            🗑️ सर्व चित्रे काढा
+          </button>
+        </div>
+
+        <div id="galleryModalGrid" class="flex-1 overflow-y-auto p-2.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5 bg-white thin-scroll">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- COMPLETE APPLICATION LOGIC (STRICTLY INSIDE ONE VALID <script> TAG)     -->
+  <!-- ======================================================================= -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. UTILITIES & MARATHI DIGITS
+    // -------------------------------------------------------------------------
+    const MR_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+    function toMr(num) {
+      return String(num).replace(/\d/g, d => MR_DIGITS[Number(d)]);
+    }
+
+    let toastTimer = null;
+    function showToast(msg, ms = 2600) {
+      const box = document.getElementById('toastBox');
+      if (!box) return;
+      box.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('hidden'), ms);
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. APPLICATION STATE (Persisted in localStorage)
+    // -------------------------------------------------------------------------
+    const state = {
+      screen: 0, // 0:Welcome, 1:Login, 2:Subject, 3:Domain/Level, 4:Practice
+      role: 'STUDENT',
+      studentName: '',
+      schoolName: 'जिल्हा परिषद प्राथमिक शाळा ईळदा',
+      grade: 1,
+      subject: 'MARATHI',
+      domain: 'मौखिक भाषा',
+      levelNum: 1,
+      mode: 'PRACTICE',
+      qIdx: 0,
+      stars: 0,
+      solved: []
+    };
+
+    function loadSavedState() {
+      try {
+        const raw = localStorage.getItem('nipun_balmitra_v2_state');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.studentName) state.studentName = parsed.studentName;
+          if (parsed.schoolName) state.schoolName = parsed.schoolName;
+          if (parsed.grade) state.grade = Number(parsed.grade);
+          if (parsed.stars) state.stars = Number(parsed.stars);
+          if (Array.isArray(parsed.solved)) state.solved = parsed.solved;
+        }
+      } catch (_) {}
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('nipun_balmitra_v2_state', JSON.stringify({
+          studentName: state.studentName,
+          schoolName: state.schoolName,
+          grade: state.grade,
+          stars: state.stars,
+          solved: state.solved
+        }));
+      } catch (_) {}
+    }
+
+    function markQuestionSolved(qKey) {
+      if (!state.solved.includes(qKey)) {
+        state.solved.push(qKey);
+        state.stars += 5;
+        saveState();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. OFFICIAL NIPUN MAHARASHTRA 2026-27 (ANNEXURE-1) CURRICULUM
+    // -------------------------------------------------------------------------
+    const CURRICULUM = {
+      MARATHI: {
+        1: {
+          'मौखिक भाषा': [
+            'स्तर १: दिलेल्या परिचित चित्रावर २-३ शब्द सांगतो.',
+            'स्तर २: दिलेल्या चित्रांवर शिक्षकांनी विचारलेल्या प्रश्नांची उत्तरे देतो.',
+            'स्तर ३: परिसरातील परिचित बडबडगीत म्हणतो.'
+          ],
+          'वाचन': [
+            'स्तर १: दिलेल्या चित्राशी संबंधित शब्द वाचतो.',
+            'स्तर २: वर्णमालेतील काही अक्षरे वाचतो.',
+            'स्तर ३: वर्णमालेतील सर्व अक्षरे व स्वरचिन्हे यांच्या मदतीने दोन अक्षरी शब्द वाचतो.',
+            'स्तर ४: कमीतकमी २-३ अक्षरांपासून तयार केलेले सोपे जोडाक्षरयुक्त शब्द वाचतो.',
+            'स्तर ५: वयानुरूप अपरिचित मजकुरातील ४-५ सोप्या शब्दांनी तयार झालेली लहान वाक्ये वाचतो.'
+          ],
+          'लेखन': [
+            'स्तर १: वर्णमालेतील काही अक्षरे पाहून लिहितो.',
+            'स्तर २: दिलेल्या शब्दातील योग्य अक्षराला स्वरचिन्ह जोडून अर्थपूर्ण शब्द लिहितो.',
+            'स्तर ३: २ ते ३ शब्दांची व सोप्या जोडाक्षरांची १-२ सोपी वाक्ये पाहून लिहितो.',
+            'स्तर ४: २ ते ३ शब्दांची १ ते २ वाक्ये ऐकून लिहितो.'
+          ]
+        },
+        2: {
+          'मौखिक भाषा': [
+            'स्तर १: परिसरातील परिचित गाणी किंवा कविता म्हणतो.',
+            'स्तर २: दिलेले शब्द पाहून / ऐकून पुनरावृत्ती करतो.',
+            'स्तर ३: दिलेल्या चित्रावर १-२ वाक्य बोलतो.',
+            'स्तर ४: शिक्षकांनी दिलेल्या सूचनांचे पालन करतो.'
+          ],
+          'वाचन': [
+            'स्तर १: दिलेल्या चित्रकथेचे स्वतःच्या भाषेत २-३ वाक्यांत वर्णन करतो.',
+            'स्तर २: दिलेल्या शब्दातील अक्षरे वापरून नवीन शब्द तयार करून वाचतो.',
+            'स्तर ३: सर्व अक्षरे आणि स्वरचिन्हे यांच्या मदतीने दोन अक्षरी शब्द वाचतो.',
+            'स्तर ४: परिचित मजकुरातील २ ते ३ सोप्या शब्दांची लहान वाक्ये वाचतो.',
+            'स्तर ५: परिचित मजकुरातील ३-४ शब्दांची वाक्ये विरामचिन्हांसह योग्य गतीने वाचतो.',
+            'स्तर ६: जोडाक्षरयुक्त ६ ते ८ वाक्यांचा अपरिचित मजकूर आकलनासह वाचतो.'
+          ],
+          'लेखन': [
+            'स्तर १: श्रुतलेखन करताना सर्व अक्षरे व स्वरचिन्हे वापरून शब्द लिहितो.',
+            'स्तर २: २-३ शब्दांची व सोप्या जोडाक्षरांची २-३ वाक्ये पाहून लिहितो.',
+            'स्तर ३: स्वतः व्यक्त होण्यासाठी २ ते ३ सोपी वाक्ये अचूकपणे लिहितो.',
+            'स्तर ४: ४-५ सोपे शब्द व जोडाक्षरे युक्त २-३ वाक्ये ऐकून लिहितो.',
+            'स्तर ५: सोपी जोडाक्षरयुक्त ४ ते ५ वाक्ये ऐकून विरामचिन्हांसह सुवाच्य लिहितो.'
+          ]
+        },
+        3: {
+          'वाचन': [
+            'स्तर १: वर्णमालेतील सर्व अक्षरे वाचतो.',
+            'स्तर २: सर्व अक्षरे व स्वरचिन्हे वापरून ३ ते ४ अक्षरी शब्द वाचतो.',
+            'स्तर ३: परिचित मजकुरातील ३ ते ५ शब्दांची लहान वाक्ये वाचतो.',
+            'स्तर ४: जोडाक्षरासह ३-५ शब्दांची वाक्ये विरामचिन्हांसह व आकलनासह वाचतो.',
+            'स्तर ५: अपरिचित ६-८ वाक्यांचा जोडाक्षरयुक्त मजकूर योग्य गतीने व आकलनासह वाचतो.'
+          ],
+          'लेखन': [
+            'स्तर १: सोपे शब्द पाहून लिहितो.',
+            'स्तर २: श्रुतलेखन करताना अक्षरे व स्वरचिन्हे वापरून शब्द लिहितो.',
+            'स्तर ३: ४-५ शब्द व सोपी जोडाक्षरे असलेली २-३ वाक्ये पाहून लिहितो.',
+            'स्तर ४: २-३ शब्द व जोडाक्षरे युक्त ३-४ वाक्ये ऐकून विरामचिन्हांसह लिहितो.',
+            'स्तर ५: श्रुतलेखनाकरिता ६-८ शब्द व जोडाक्षरे युक्त ६-८ वाक्ये आकलनासह लिहितो.'
+          ]
+        }
+      },
+      MATH: {
+        1: {
+          'अवकाशीय संबोध': ['स्तर १: जवळ-दूर, आत-बाहेर, वर-खाली, डावीकडे-उजवीकडे, पुढे-मागे ओळखतो.'],
+          'आकार': [
+            'स्तर १: त्रिमितीय आकारांच्या भौतिक गुणधर्मांचे निरीक्षण करतो व ओळखतो.',
+            'स्तर २: त्रिमितीय आकारांचे वर्णन करतो (वक्राकार/सपाट पृष्ठभाग, कडा, कोपरे).'
+          ],
+          'आकृतिबंध': [
+            'स्तर १: परिसरातील आकारांचे सोपे आकृतिबंध ओळखतो व पूर्ण करतो.',
+            'स्तर २: परिसरातील संख्यांचे सोपे आकृतिबंध ओळखतो व पूर्ण करतो.'
+          ],
+          'संख्याज्ञान': [
+            'स्तर १: ० ते ९ पर्यंतच्या संख्या ओळखतो / वाचतो.',
+            'स्तर २: ० ते ९ पर्यंतच्या संख्या मोजतो व लिहितो.',
+            'स्तर ३: १० ते २० पर्यंतच्या संख्या ओळखतो / वाचतो.',
+            'स्तर ४: वस्तू मोजतो व २० पर्यंत संख्याबोध विकसित करतो.',
+            'स्तर ५: चलनातील ₹२० पर्यंतची नाणी आणि नोटा ओळखतो.'
+          ],
+          'संख्यांवरील क्रिया': [
+            'स्तर १: ० ते ९ पर्यंतच्या संख्यांची बेरीज करतो.',
+            'स्तर २: ० ते ९ पर्यंतच्या संख्यांची वजाबाकी करतो.',
+            'स्तर ३: ० ते ९ पर्यंतच्या बेरजेची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ४: ० ते ९ पर्यंतच्या वजाबाकीची शाब्दिक उदाहरणे सोडवतो.'
+          ],
+          'मापन': [
+            'स्तर १: अप्रमाणित एककांच्या सहाय्याने लांबीचा अंदाज घेतो (वीत, पाऊल).',
+            'स्तर २: अप्रमाणित एककांच्या सहाय्याने धारकतेचा अंदाज घेतो (कप, चमचा).'
+          ]
+        },
+        2: {
+          'अवकाशीय संबोध': ['स्तर १: जवळ-दूर, आत-बाहेर, वर-खाली, डावी-उजवी शब्द योग्य संदर्भात वापरतो.'],
+          'आकार': [
+            'स्तर १: चौरस, त्रिकोण व वर्तुळ हे द्विमितीय आकार ओळखतो.',
+            'स्तर २: चौरस, त्रिकोण व वर्तुळ या आकारांचे वर्णन करतो.'
+          ],
+          'आकृतिबंध': [
+            'स्तर १: आकारांचे आकृतिबंध ओळखतो आणि नवीन आकृतिबंध तयार करतो.',
+            'स्तर २: संख्यांचे आकृतिबंध ओळखतो आणि नवीन आकृतिबंध तयार करतो.'
+          ],
+          'संख्याज्ञान': [
+            'स्तर १: २१ ते ५० पर्यंतच्या संख्या ओळखतो / वाचतो.',
+            'स्तर २: २१ ते ५० पर्यंतच्या संख्या मोजतो / लिहितो.',
+            'स्तर ३: ५१ ते ९९ पर्यंतच्या संख्या ओळखतो / वाचतो.',
+            'स्तर ४: ५१ ते ९९ पर्यंतच्या संख्या मोजतो / लिहितो.'
+          ],
+          'चलनी व्यवहार': [
+            'स्तर १: ₹५० पर्यंतच्या रकमेचा वापर करून साधे व्यवहार करतो.',
+            'स्तर २: ₹१०० पर्यंतच्या रकमेचा वापर करून साधे व्यवहार करतो.'
+          ],
+          'संख्यांवरील क्रिया': [
+            'स्तर १: ० ते ९९ पर्यंत बिनहातच्याची बेरीज करतो.',
+            'स्तर २: ० ते ९९ पर्यंत बिनहातच्याची वजाबाकी करतो.',
+            'स्तर ३: ० ते ९९ पर्यंत बेरजेची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ४: ० ते ९९ पर्यंत वजाबाकीची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ५: गट करून लहान संख्येचा (१ ते ४) गुणाकार करतो.',
+            'स्तर ६: समान वाटणी करून (१ ते ४) भागाकार करतो.',
+            'स्तर ७: २, ३ व ४ चे पाढे तयार करतो व वापरतो.'
+          ],
+          'मापन': ['स्तर १: अप्रमाणित एककांनी लांबी, वजन (तराजू) व धारकता मोजतो व तुलना करतो.']
+        },
+        3: {
+          'आकार': ['स्तर १: आयत, त्रिकोण आणि वर्तुळ या द्विमितीय आकारांचे मूलभूत गुणधर्म ओळखतो.'],
+          'आकृतिबंध': ['स्तर १: द्विमितीय आकारांचे व संख्यांचे आकृतिबंध ओळखतो, विस्तार व निर्मिती करतो.'],
+          'संख्याज्ञान': [
+            'स्तर १: ९९९ पर्यंतच्या संख्या ओळखतो / वाचतो.',
+            'स्तर २: ९९९ पर्यंतच्या संख्या अंकांत लिहितो.',
+            'स्तर ३: ९९९ पर्यंतच्या संख्या अक्षरांत लिहितो.'
+          ],
+          'चलनी व्यवहार': [
+            'स्तर १: ₹५०० पर्यंतच्या रकमेचे व्यवहार करतो.',
+            'स्तर २: ₹९९९ पर्यंतच्या रकमेचे व्यवहार करतो.'
+          ],
+          'संख्यांवरील क्रिया': [
+            'स्तर १: ९९ पर्यंत हातच्याची बेरीज करतो.',
+            'स्तर २: ९९ पर्यंत हातच्याच्या बेरजेची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ३: ९९ पर्यंत हातच्याची वजाबाकी करतो.',
+            'स्तर ४: ९९ पर्यंत हातच्याच्या वजाबाकीची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ५: ९९९ पर्यंत बिनहातच्याची बेरीज करतो.',
+            'स्तर ६: ९९९ पर्यंत बिनहातच्याच्या बेरजेची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ७: ९९९ पर्यंत बिनहातच्याची वजाबाकी करतो.',
+            'स्तर ८: ९९९ पर्यंत बिनहातच्याच्या वजाबाकीची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ९: ९९९ पर्यंत हातच्याची बेरीज करतो.',
+            'स्तर १०: ९९९ पर्यंत हातच्याच्या बेरजेची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर ११: ९९९ पर्यंत हातच्याची वजाबाकी करतो.',
+            'स्तर १२: ९९९ पर्यंत हातच्याच्या वजाबाकीची शाब्दिक उदाहरणे सोडवतो.',
+            'स्तर १३: बेरीज व गुणाकार संबंध (१० पर्यंतचे पाढे).',
+            'स्तर १४: वजाबाकी व भागाकार संबंध (१० पर्यंतचे पाढे).',
+            'स्तर १५: १० पर्यंतचे पाढे तयार करतो व वापरतो.'
+          ],
+          'मापन': ['स्तर १: लांबी, वजन, आकारमान व धारकता यासाठी प्रमाणित एकके निवडतो (मी., ग्रॅ., लि.).']
+        }
+      }
+    };
+
+    function getCurriculumForGrade(subject, grade) {
+      const gKey = grade >= 3 ? 3 : grade;
+      return CURRICULUM[subject][gKey];
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. 10 EXCLUSIVE ORAL LANGUAGE SCENES + PERMANENT INDEXEDDB STORAGE
+    // -------------------------------------------------------------------------
+    const ORAL_HD_PHOTOS = [
+      {
+        id: 'shet', matchKey: '1000713536', title: 'गावातील शेत', emoji: '🌾', bg: '#DCFCE7',
+        hints1: ['शेतकरी', 'बैल', 'नांगर', 'शेत'], hints2: ['मुले', 'पाणी', 'झाड', 'गोठा'],
+        q1: 'चित्रात शेतकरी आणि बैल काय करत आहेत?',
+        q2: 'झाडाखाली बसलेली दोन मुले कशाकडे बोट दाखवत आहेत? शेतात पाणी कोठून येत आहे?'
+      },
+      {
+        id: 'shala', matchKey: '1000713539', title: 'जिल्हा परिषद प्राथमिक शाळा ईळदा', emoji: '🏫', bg: '#FEF3C7',
+        hints1: ['शाळा', 'झोपाळा', 'फुटबॉल', 'मुले'], hints2: ['पुस्तक', 'तिरंगा', 'गवत', 'शिक्षिका'],
+        q1: 'चित्रातील शाळेचे नाव काय आहे आणि मुले कोणते खेळ खेळत आहेत?',
+        q2: 'हिरव्या गवतावर बसलेली मुले काय करत आहेत? शाळेवर कोणता ध्वज फडकत आहे?'
+      },
+      {
+        id: 'bajar', matchKey: '1000713540', title: 'आठवडी बाजार', emoji: '🧺', bg: '#FFEDD5',
+        hints1: ['टोमॅटो', 'कांदे', 'वांगी', 'केळी'], hints2: ['कोथिंबीर', 'शेळी', 'मडकी', 'खेळणी'],
+        q1: 'आठवडी बाजारात कोणकोणत्या भाज्या व वस्तू विक्रीसाठी आहेत?',
+        q2: 'मुले भाजीवाल्या काकूंकडून काय घेत आहेत? बाजारात कोणता प्राणी दिसत आहे?'
+      },
+      {
+        id: 'mor', matchKey: '1000713541', title: 'भारताचा राष्ट्रीय पक्षी मोर', emoji: '🦚', bg: '#CCFBF1',
+        hints1: ['मोर', 'पिसारा', 'निळा', 'हिरवा'], hints2: ['लांडोर', 'पिल्ले', 'धबधबा', 'फुले'],
+        q1: 'चित्रातील सुंदर पक्षी कोणता आहे? त्याचा पिसारा कसा दिसतो?',
+        q2: 'मोराच्या बाजूला आणखी कोण उभे आहे आणि किती लहान पिल्ले आहेत?'
+      },
+      {
+        id: 'bag', matchKey: '1000713548', title: 'फुलांची बाग', emoji: '🌺', bg: '#FCE7F3',
+        hints1: ['गुलाब', 'झेंडू', 'जास्वंद', 'सूर्यफूल'], hints2: ['फुलपाखरू', 'मुलगा', 'मुलगी', 'शेवंती'],
+        q1: 'बागेत कोणकोणत्या रंगांची व नावांची फुले फुलली आहेत?',
+        q2: 'लाल जास्वंदीच्या फुलावर काय बसले आहे? मुले कशाकडे पाहून हसत आहेत?'
+      },
+      {
+        id: 'paus', matchKey: '1000713552', title: 'पावसाळा व कागदी होडी', emoji: '🌧️', bg: '#E0F2FE',
+        hints1: ['पाऊस', 'रेनकोट', 'आनंद', 'मुले'], hints2: ['कागदी होडी', 'पाणी', 'गाय', 'झाडे'],
+        q1: 'पावसात भिजणाऱ्या मुलांनी काय घातले आहे आणि ती का आनंदी आहेत?',
+        q2: 'मागे बसलेली दोन मुले पाण्यात काय सोडत आहेत? चित्रात कोणता प्राणी दिसतो?'
+      },
+      {
+        id: 'gay', matchKey: '1000713553', title: 'गाय व वासरू', emoji: '🐄', bg: '#ECFCCB',
+        hints1: ['गाय', 'दूध', 'बादली', 'मुलगी'], hints2: ['वासरू', 'घंटा', 'घर', 'गवत'],
+        q1: 'चित्रातील मुलगी काय करत आहे? गाय आपल्याला काय देते?',
+        q2: 'गायीच्या बाजूला कोण उभे आहे? गायीच्या गळ्यात काय बांधले आहे?'
+      },
+      {
+        id: 'amba', matchKey: '1000713565', title: 'गोड पिवळा आंबा', emoji: '🥭', bg: '#FEF9C3',
+        hints1: ['आंबा', 'पिवळा', 'मुलगी', 'गोड'], hints2: ['टोपली', 'झाड', 'पाने', 'फांदी'],
+        q1: 'मुलीच्या हातात कोणते फळ आहे? त्याचा रंग कसा आहे?',
+        q2: 'टोपलीत आणि झाडावर काय लटकलेले दिसत आहे?'
+      },
+      {
+        id: 'kutumb', matchKey: '1000713566', title: 'आनंदी कुटुंब', emoji: '👨‍👩‍👧‍👦', bg: '#FFEDD5',
+        hints1: ['आई', 'बाबा', 'आजी', 'आजोबा'], hints2: ['फुटबॉल', 'टोपी', 'चष्मा', 'हसणे'],
+        q1: 'चित्रात कुटुंबातील कोणकोणते सदस्य आहेत?',
+        q2: 'मुलाच्या हातात काय आहे? आजी-आजोबा कसे दिसत आहेत?'
+      },
+      {
+        id: 'diwali', matchKey: '1000713574', title: 'दिवाळी सण', emoji: '🪔', bg: '#FEF3C7',
+        hints1: ['पणत्या', 'रांगोळी', 'दिवाळी', 'मुले'], hints2: ['फटाके', 'आकाशकंदील', 'झेंडू', 'दिवे'],
+        q1: 'मुलगा आणि मुलगी काय करत आहेत? अंगणात काय काढले आहे?',
+        q2: 'आकाशात काय दिसत आहे आणि घरावर कोणती सजावट केली आहे?'
+      }
+    ];
+
+    const IDB_NAME = 'nipun_balmitra_images_db';
+    const IDB_STORE = 'oral_images';
+    let oralImageCache = {};
+    let singleUploadSceneId = null;
+
+    function openOralImageDB() {
+      return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) return reject(new Error('No IndexedDB'));
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE, { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    async function loadAllImagesFromIDB() {
+      try {
+        const db = await openOralImageDB();
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const req = tx.objectStore(IDB_STORE).getAll();
+        await new Promise((resolve, reject) => {
+          req.onsuccess = () => {
+            oralImageCache = {};
+            (req.result || []).forEach(r => { if (r && r.id && r.dataUrl) oralImageCache[r.id] = r.dataUrl; });
+            resolve();
+          };
+          req.onerror = () => reject(req.error);
+        });
+        updateGalleryCounters();
+        if (state.screen === 4 && state.subject === 'MARATHI' && state.domain === 'मौखिक भाषा') {
+          renderScreen4();
+        }
+      } catch (_) {}
+    }
+
+    async function saveImageToIDB(sceneId, dataUrl) {
+      oralImageCache[sceneId] = dataUrl;
+      try {
+        const db = await openOralImageDB();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put({ id: sceneId, dataUrl, savedAt: Date.now() });
+        await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+      } catch (_) {}
+      updateGalleryCounters();
+    }
+
+    async function deleteOralImageFromIDB(sceneId) {
+      delete oralImageCache[sceneId];
+      try {
+        const db = await openOralImageDB();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(sceneId);
+        await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+      } catch (_) {}
+      updateGalleryCounters();
+      renderGalleryGrid();
+      if (state.screen === 4 && state.subject === 'MARATHI' && state.domain === 'मौखिक भाषा') renderScreen4();
+      showToast('🗑️ चित्र काढून टाकले.');
+    }
+
+    async function clearAllOralImagesFromIDB() {
+      oralImageCache = {};
+      try {
+        const db = await openOralImageDB();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).clear();
+        await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+      } catch (_) {}
+      updateGalleryCounters();
+      renderGalleryGrid();
+      if (state.screen === 4 && state.subject === 'MARATHI' && state.domain === 'मौखिक भाषा') renderScreen4();
+      showToast('🗑️ सर्व जतन केलेली चित्रे काढली.');
+    }
+
+    function compressImageFileToDataUrl(file, maxWidth = 960, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Read error'));
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onerror = () => resolve(ev.target.result);
+          img.onload = () => {
+            try {
+              const scale = img.width > maxWidth ? (maxWidth / img.width) : 1;
+              const canvas = document.createElement('canvas');
+              canvas.width = Math.max(1, Math.round(img.width * scale));
+              canvas.height = Math.max(1, Math.round(img.height * scale));
+              canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL('image/jpeg', quality));
+            } catch (_) {
+              resolve(ev.target.result);
+            }
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function triggerBulkOralUpload() {
+      const inp = document.getElementById('bulkOralImgInput');
+      if (inp) { inp.value = ''; inp.click(); }
+    }
+
+    function triggerSingleOralUpload(sceneId) {
+      singleUploadSceneId = sceneId;
+      const inp = document.getElementById('singleOralImgInput');
+      if (inp) { inp.value = ''; inp.click(); }
+    }
+
+    async function handleBulkOralUpload(event) {
+      const files = Array.from((event.target && event.target.files) || []);
+      if (!files.length) return;
+      const assignments = [];
+      const unmatched = [];
+      const used = new Set();
+
+      files.forEach(file => {
+        const fname = (file.name || '').toLowerCase();
+        const found = ORAL_HD_PHOTOS.find(sc => !used.has(sc.id) && fname.includes(sc.matchKey));
+        if (found) {
+          used.add(found.id);
+          assignments.push({ sceneId: found.id, file });
+        } else {
+          unmatched.push(file);
+        }
+      });
+
+      const available = [
+        ...ORAL_HD_PHOTOS.filter(sc => !used.has(sc.id) && !oralImageCache[sc.id]),
+        ...ORAL_HD_PHOTOS.filter(sc => !used.has(sc.id) && oralImageCache[sc.id])
+      ];
+      unmatched.forEach((file, idx) => {
+        if (idx < available.length) assignments.push({ sceneId: available[idx].id, file });
+      });
+
+      let count = 0;
+      for (const item of assignments) {
+        try {
+          const dataUrl = await compressImageFileToDataUrl(item.file);
+          await saveImageToIDB(item.sceneId, dataUrl);
+          count++;
+        } catch (_) {}
+      }
+      if (count > 0) {
+        showToast(`✅ ${toMr(count)} चित्रे कायमस्वरूपी जतन झाली!`);
+        renderGalleryGrid();
+        if (state.screen === 4 && state.subject === 'MARATHI' && state.domain === 'मौखिक भाषा') renderScreen4();
+      }
+    }
+
+    async function handleSingleOralUpload(event) {
+      const file = event.target && event.target.files && event.target.files[0];
+      if (!file || !singleUploadSceneId) return;
+      try {
+        const dataUrl = await compressImageFileToDataUrl(file);
+        await saveImageToIDB(singleUploadSceneId, dataUrl);
+        showToast('✅ चित्र कायमस्वरूपी जतन झाले!');
+        renderGalleryGrid();
+        if (state.screen === 4 && state.subject === 'MARATHI' && state.domain === 'मौखिक भाषा') renderScreen4();
+      } catch (_) {
+        showToast('⚠️ चित्र जतन करताना त्रुटी आली.');
+      }
+    }
+
+    function updateGalleryCounters() {
+      const count = ORAL_HD_PHOTOS.filter(sc => Boolean(oralImageCache[sc.id])).length;
+      const tEl = document.getElementById('teacherGalleryCount');
+      if (tEl) tEl.textContent = `${toMr(count)} / १० चित्रे कायमस्वरूपी जतन केली आहेत`;
+      const mEl = document.getElementById('galleryModalSummary');
+      if (mEl) mEl.textContent = `${toMr(count)} / १० चित्रे जतन केली आहेत`;
+    }
+
+    function openGalleryModal() {
+      updateGalleryCounters();
+      renderGalleryGrid();
+      document.getElementById('galleryModal').classList.remove('hidden');
+    }
+
+    function closeGalleryModal() {
+      document.getElementById('galleryModal').classList.add('hidden');
+    }
+
+    function buildOfflineSvgFallback(photo) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${photo.bg}"/><stop offset="100%" stop-color="#FFFDF7"/></linearGradient></defs>
+        <rect width="640" height="300" fill="url(#g)"/>
+        <circle cx="560" cy="54" r="36" fill="#FDBA74" opacity="0.45"/>
+        <circle cx="84" cy="246" r="54" fill="#99F6E4" opacity="0.45"/>
+        <text x="320" y="106" font-size="74" text-anchor="middle" dominant-baseline="middle">${photo.emoji}</text>
+        <text x="320" y="186" font-size="24" font-weight="bold" fill="#0F172A" text-anchor="middle" font-family="sans-serif">${photo.title}</text>
+        <rect x="74" y="214" width="492" height="42" rx="21" fill="#0F766E" opacity="0.14"/>
+        <text x="320" y="241" font-size="15" font-weight="bold" fill="#115E59" text-anchor="middle" font-family="sans-serif">तुमचे चित्र जोडण्यासाठी वर '🖼️ १० चित्रे जोडा' दाबा</text>
+      </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function renderGalleryGrid() {
+      const grid = document.getElementById('galleryModalGrid');
+      if (!grid) return;
+      grid.innerHTML = ORAL_HD_PHOTOS.map((sc, idx) => {
+        const saved = Boolean(oralImageCache[sc.id]);
+        const src = saved ? oralImageCache[sc.id] : buildOfflineSvgFallback(sc);
+        return `
+          <div class="rounded-xl border-2 ${saved ? 'border-emerald-400 bg-emerald-50/40' : 'border-amber-200 bg-amber-50/40'} p-2 flex flex-col gap-1.5">
+            <div class="relative h-24 rounded-lg overflow-hidden bg-white border border-slate-200 flex items-center justify-center">
+              <img src="${src}" alt="${sc.title}" class="w-full h-full object-contain" />
+              <span class="absolute top-1 right-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-extrabold ${saved ? 'bg-emerald-600 text-white' : 'bg-amber-200 text-amber-950'}">${saved ? '✓ जतन' : 'बाकी'}</span>
+            </div>
+            <div class="text-[11px] font-extrabold text-slate-900 truncate">${toMr(idx + 1)}. ${sc.title}</div>
+            <div class="text-[9.5px] font-bold text-slate-500">कोड: ${sc.matchKey}</div>
+            <div class="flex gap-1 mt-auto">
+              <button type="button" onclick="triggerSingleOralUpload('${sc.id}')" class="touch-btn flex-1 py-1 px-1.5 rounded-lg bg-teal-700 text-white text-[10px] font-extrabold">📷 ${saved ? 'बदला' : 'जोडा'}</button>
+              ${saved ? `<button type="button" onclick="deleteOralImageFromIDB('${sc.id}')" class="touch-btn py-1 px-2 rounded-lg bg-rose-100 text-rose-800 border border-rose-300 text-[10px] font-extrabold">🗑️</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. NON-PICTURE ORAL LANGUAGE DATASETS (20 ITEMS EACH)
+    // -------------------------------------------------------------------------
+    const ORAL_RHYMES_G1 = [
+      { title: 'ये रे ये रे पावसा', lines: 'ये रे ये रे पावसा, तुला देतो पैसा,\nपैसा झाला खोटा, पाऊस आला मोठा!' },
+      { title: 'अडगुलं मडगुलं', lines: 'अडगुलं मडगुलं सोन्याचं कडगुलं,\nरुप्याचा वाळा तान्ह्या बाळा!' },
+      { title: 'चांदोमामा', lines: 'चांदोमामा चांदोमामा भागलास का?\nलिंबोणीच्या झाडामागे लपलास का?' },
+      { title: 'किलबिल किलबिल', lines: 'किलबिल किलबिल पक्षी बोलती,\nझुळझुळ झुळझुळ वारे वाहती!' },
+      { title: 'मनीमाऊ', lines: 'मनीमाऊ मनीमाऊ करते म्याँव,\nदूध पिऊन घेते उंचच उंच धाव!' },
+      { title: 'एक होता कावळा', lines: 'एक होता कावळा, रंगाने सावळा,\nपाणी शोधत फिरला, थेंब थेंब प्याला!' },
+      { title: 'ससा रे ससा', lines: 'ससा रे ससा, दिसतोस कसा?\nकापूस पिंजून ठेवलाय जसा!' },
+      { title: 'आगगाडी झुकझुक', lines: 'झुकझुक झुकझुक अगीनगाडी,\nधुरांच्या रेषा हवेत काढी!' },
+      { title: 'नाच रे मोरा', lines: 'नाच रे मोरा आंब्याच्या वनात,\nनाच रे मोरा नाच!' },
+      { title: 'अक्कड बक्कड', lines: 'अक्कड बक्कड बंबे बो,\nअस्सी नब्बे पुरे सौ!' },
+      { title: 'फुलपाखरू', lines: 'छान छान फुलपाखरू, फुलांवरती फिरते,\nरंगीबेरंगी पंख हलवत, गोड गोड हसते!' },
+      { title: 'माझी शाळा', lines: 'माझी शाळा सुंदर शाळा,\nखेळू गाऊ शिकू चला!' },
+      { title: 'कोल्होबा', lines: 'कोल्होबा कोल्होबा कुठे गेला होतास?\nद्राक्षांच्या मळ्यात गेलो होतो!' },
+      { title: 'बेडूकराव', lines: 'डराव डराव का ओरडता?\nपाऊस आला म्हणून गातो!' },
+      { title: 'सूर्य उगवला', lines: 'सूर्य उगवला पूर्वेला,\nचला उठूया शाळेला!' },
+      { title: 'आई माझी', lines: 'आई माझी गोड गोड,\nलाडू देते मोठमोठ!' },
+      { title: 'चिमणी ताई', lines: 'चिव चिव चिमणी दाणा टिपते,\nघरट्यामध्ये पिल्लांना भरवते!' },
+      { title: 'झाड लावूया', lines: 'एक झाड लावूया, पाणी त्याला घालूया,\nसावलीत त्याच्या आनंदाने खेळूया!' },
+      { title: 'हात्तीदादा', lines: 'हात्तीदादा मोठे मोठे, सोंड त्यांची लांब,\nचालताना डुलत डुलत, थांबतात थांब!' },
+      { title: 'छत्री माझी', lines: 'छत्री माझी रंगीत छत्री,\nपावसामध्ये देते साथ रात्री!' }
+    ];
+
+    const ORAL_POEMS_G2 = [
+      { title: 'माझा गाव', lines: 'हिरवे हिरवे शेत मळा, स्वच्छ वाहतो नदीचा झरा,\nपक्षी गाती गोड गाणे, माझा गाव किती छान खरा!' },
+      { title: 'पावसाचे गाणे', lines: 'टप टप थेंब पडती खाली, हिरवीगार झाली धरती,\nकागदी होडी सोडायला, मुले सारी पळत सुटती!' },
+      { title: 'पुस्तकाची मैत्री', lines: 'पुस्तक माझे मित्र खरे, रोज देते ज्ञान नवे,\nवाचू लिहू आनंदाने, होऊ सारे निपुण नवे!' },
+      { title: 'स्वच्छता गीत', lines: 'हात धुऊया साबणाने, कचरा टाकू कचराकुंडीत,\nस्वच्छ ठेवू शाळा आपली, आनंद नांदेल प्रत्येक भिंतीत!' },
+      { title: 'फुलांची बाग', lines: 'गुलाब लाल झेंडू पिवळा, जास्वंद हसते बागेत,\nफुलपाखरे नाचत फिरती, गोड सुगंधाच्या रंगात!' },
+      { title: 'शेतकरी दादा', lines: 'पहाटे उठतो शेतकरी दादा, नांगर धरतो हातात,\nकष्ट करून धान्य पिकवतो, सोनं उगवतं शेतात!' },
+      { title: 'तिरंगा ध्वज', lines: 'केशरी पांढरा हिरवा रंग, मध्ये निळे अशोकचक्र,\nवंदन करूया तिरंग्याला, भारत देश आपला श्रेष्ठ!' },
+      { title: 'आजीची गोष्ट', lines: 'रात्री बसतो आजीजवळ, ऐकतो छान छान गोष्ट,\nराजा राणी अन् चतुर कावळा, मन होते अगदी तुष्ट!' },
+      { title: 'वेळेचे महत्त्व', lines: 'सकाळी लवकर उठावे, वेळेवर शाळेत जावे,\nरोज थोडा अभ्यास करून, नाव शाळेचे उंचवावे!' },
+      { title: 'पाणी वाचवा', lines: 'थेंब थेंब पाणी अमूल्य, नका वाया घालवू कधी,\nपाणी असेल तर जीवन, हिरवी राहील धरती सदा!' },
+      { title: 'माझी आई', lines: 'सकाळपासून रात्रीपर्यंत, आई करते किती काम,\nतिच्या मायेच्या सावलीत, मिळतो आम्हा गोड विराम!' },
+      { title: 'आंब्याचे झाड', lines: 'उन्हाळ्यात येतात गोड आंबे, पिवळे धमक रसाळ,\nफांदीवरती कोकीळ गाते, कुहू कुहू स्वर कमाल!' },
+      { title: 'दिवाळी आली', lines: 'अंगणात रांगोळी छान, पणत्या लावू ओळीने,\nफराळ खाऊ गोड गोड, सण साजरा करू प्रेमाने!' },
+      { title: 'चतुर ससा', lines: 'जंगलात होता चतुर ससा, सिंहाची केली युक्ती,\nबुद्धीच्या जोरावर त्याने, प्राण्यांना दिली मुक्ती!' },
+      { title: 'माझे मित्र', lines: 'शाळेत माझे मित्र छान, एकत्र खेळतो खो-खो,\nअभ्यासातही मदत करतो, कधीच नको भांडण तो!' },
+      { title: 'मोर नाचतो', lines: 'काळे ढग आकाशात आले, वारा सुटला गार,\nपिसारा फुलवून मोर नाचतो, दिसतो किती सुंदर फार!' },
+      { title: 'गाय आमची', lines: 'गाय आमची गोड गरीब, देते आम्हा पौष्टिक दूध,\nवासरू तिचे उड्या मारते, पाहून मन होते शुद्ध!' },
+      { title: 'खेळाचे मैदान', lines: 'शाळेपुढे मोठे मैदान, खेळतो आम्ही रोज खेळ,\nशरीर राहते तंदुरुस्त, आनंदात जातो वेळ!' },
+      { title: 'निसर्ग मित्र', lines: 'झाडे, डोंगर, नद्या, पक्षी, सारे आपले मित्र,\nरक्षण करूया निसर्गाचे, सुंदर ठेवू हे चित्र!' },
+      { title: 'निपुण महाराष्ट्र', lines: 'वाचन, लेखन, गणित सोपे, रोज करूया सराव,\nनिपुण होऊया सारे मिळून, उजळूया आपले गाव!' }
+    ];
+
+    const ORAL_WORD_ECHO_G2 = [
+      ['कमळ', 'घर', 'नळ', 'बस'], ['काका', 'मामा', 'दादा', 'बाबा'],
+      ['चिमणी', 'कावळा', 'मोर', 'पोपट'], ['आंबा', 'केळी', 'पेरू', 'चिकू'],
+      ['शाळा', 'पुस्तक', 'वही', 'पेन'], ['पाऊस', 'ढग', 'छत्री', 'पाणी'],
+      ['शेतकरी', 'बैल', 'नांगर', 'पीक'], ['गुलाब', 'झेंडू', 'मोगरा', 'कमळ'],
+      ['सूर्य', 'चंद्र', 'तारे', 'आकाश'], ['गाय', 'वासरू', 'शेळी', 'घोडा'],
+      ['टोमॅटो', 'बटाटा', 'कांदा', 'वांगे'], ['दिवाळी', 'रांगोळी', 'पणती', 'फराळ'],
+      ['आई', 'वडील', 'आजी', 'आजोबा'], ['नदी', 'तलाव', 'विहीर', 'धबधबा'],
+      ['रविवार', 'सोमवार', 'मंगळवार', 'बुधवार'], ['लाल', 'पिवळा', 'निळा', 'हिरवा'],
+      ['सायकल', 'बस', 'रेल्वे', 'विमान'], ['खो-खो', 'कबड्डी', 'लगोरी', 'फुटबॉल'],
+      ['अक्षर', 'शब्द', 'वाक्य', 'गोष्ट'], ['निपुण', 'सराव', 'आनंद', 'यश']
+    ];
+
+    const ORAL_INSTRUCTIONS_G2 = [
+      { text: 'तुमचे दोन्ही हात वर करा आणि हसा!', choices: ['🙌 हात वर केले', '👏 टाळ्या वाजवल्या', '🪑 खाली बसलो'], ans: 0 },
+      { text: 'तीन वेळा जोरात टाळ्या वाजवा.', choices: ['👏 तीन टाळ्या', '👆 एक बोट', '🙋 हात वर'], ans: 0 },
+      { text: 'फक्त हिरव्या रंगाचे बटण दाबा.', choices: ['🔴 लाल', '🟢 हिरवा', '🔵 निळा'], ans: 1 },
+      { text: 'तुमच्या डाव्या हाताने नाकाला स्पर्श करा.', choices: ['👃 नाकाला स्पर्श', '👂 कानाला स्पर्श', '👀 डोळ्याला स्पर्श'], ans: 0 },
+      { text: 'येथे असलेले "पुस्तक" चित्र निवडा.', choices: ['🍎 सफरचंद', '📖 पुस्तक', '⚽ चेंडू'], ans: 1 },
+      { text: 'जागेवर उभे रहा आणि एकदा उडी मारा.', choices: ['🦘 उडी मारली', '😴 झोपलो', '✍️ लिहिले'], ans: 0 },
+      { text: 'खालीलपैकी "फूल" निवडा.', choices: ['🚗 गाडी', '🌺 फूल', '🏠 घर'], ans: 1 },
+      { text: 'डोळे बंद करून ५ पर्यंत मोजा.', choices: ['🔢 ५ पर्यंत मोजले', '🎵 गाणे गायले', '🏃 पळालो'], ans: 0 },
+      { text: 'फक्त पिवळ्या रंगाचे फळ निवडा.', choices: ['🥭 आंबा', '🍇 द्राक्षे', '🍓 स्ट्रॉबेरी'], ans: 0 },
+      { text: 'तुमच्या शेजारच्या मित्राला "नमस्कार" म्हणा.', choices: ['🙏 नमस्कार म्हटले', '👋 निरोप घेतला', '🤫 शांत बसलो'], ans: 0 },
+      { text: 'खालीलपैकी पाण्यात राहणारा प्राणी निवडा.', choices: ['🐟 मासा', '🦁 सिंह', '🐒 माकड'], ans: 0 },
+      { text: 'तुमचे पूर्ण नाव मोठ्याने सांगा.', choices: ['🗣️ नाव सांगितले', '📖 वाचले', '✍️ लिहिले'], ans: 0 },
+      { text: 'येथे "सूर्य" कोठे आहे ते निवडा.', choices: ['🌙 चंद्र', '☀️ सूर्य', '⭐ तारा'], ans: 1 },
+      { text: 'दोन्ही हातांची बोटे मोजा (एकूण १०).', choices: ['🖐️🖐️ १० मोजले', '☝️ १ मोजले', '✌️ २ मोजले'], ans: 0 },
+      { text: 'आकाशात उडणारा पक्षी निवडा.', choices: ['🐄 गाय', '🦚 मोर', '🐕 कुत्रा'], ans: 1 },
+      { text: 'तुमच्या शाळेचे नाव मोठ्याने म्हणा.', choices: ['🏫 शाळेचे नाव म्हटले', '🏠 घरचे नाव', '🌳 झाडाचे नाव'], ans: 0 },
+      { text: 'खालीलपैकी "त्रिकोण" आकार निवडा.', choices: ['⚪ वर्तुळ', '🔺 त्रिकोण', '🟦 चौरस'], ans: 1 },
+      { text: 'दीर्घ श्वास घ्या आणि हळू सोडा.', choices: ['🌬️ श्वास घेतला', '🏃 धावलो', '👏 टाळी वाजवली'], ans: 0 },
+      { text: 'लिहिण्यासाठी लागणारी वस्तू निवडा.', choices: ['🥄 चमचा', '✏️ पेन्सिल', '👟 बूट'], ans: 1 },
+      { text: 'आजचा वार कोणता आहे ते मोठ्याने सांगा.', choices: ['📅 वार सांगितला', '🌧️ पाऊस म्हटले', '🍎 फळ म्हटले'], ans: 0 }
+    ];
+
+    // -------------------------------------------------------------------------
+    // 6. READING & WRITING CONTENT GENERATOR (20 ITEMS PER LEVEL)
+    // -------------------------------------------------------------------------
+    function getReadingItems(grade, levelNum) {
+      const bank = {
+        letters: ['क', 'म', 'ल', 'न', 'र', 'स', 'ग', 'प', 'ब', 'त', 'व', 'ह', 'द', 'ज', 'च', 'अ', 'आ', 'इ', 'ई', 'उ'],
+        twoLetter: ['कमळ', 'घर', 'नळ', 'बस', 'फळ', 'जल', 'मन', 'रथ', 'गज', 'वन', 'काका', 'मामा', 'दादा', 'बाबा', 'पाणी', 'गाडी', 'साडी', 'ताई', 'माई', 'आई'],
+        jodakshar: ['पुस्तक', 'स्वच्छ', 'मित्र', 'शब्द', 'वाक्य', 'प्रगती', 'महाराष्ट्र', 'अभ्यास', 'पक्षी', 'झाड्या', 'सूर्य', 'चंद्र', 'विद्यार्थी', 'शिक्षक', 'अक्षर', 'गणित', 'ध्वज', 'प्रश्न', 'उत्तर', 'निपुण'],
+        shortSent: [
+          'रमा घर बघ.', 'कमल पाणी आण.', 'दादा बाजारात जा.', 'आई मला लाडू दे.', 'मोर छान नाचतो.',
+          'आज पाऊस आला.', 'ही माझी शाळा आहे.', 'आंबा गोड आहे.', 'गाय दूध देते.', 'पक्षी आकाशात उडतात.',
+          'मी रोज अभ्यास करतो.', 'बागेत फुले फुलली.', 'ससा वेगाने पळतो.', 'कावळा काळा आहे.', 'सूर्य पूर्वेला उगवतो.',
+          'राजू चेंडू खेळतो.', 'ताई छान गाते.', 'आजी गोष्ट सांगते.', 'बाबा शेतात जातात.', 'आपण स्वच्छ राहूया.'
+        ],
+        longPassages: [
+          'निपुण महाराष्ट्र अभियानांतर्गत प्रत्येक विद्यार्थ्याने वाचन, लेखन आणि गणितीय कौशल्ये आत्मसात करणे गरजेचे आहे.',
+          'आपल्या गावातील जिल्हा परिषद प्राथमिक शाळा खूप सुंदर आहे. शाळेच्या आवारात हिरवीगार झाडे आणि फुलांची बाग आहे.',
+          'दररोज किमान पंधरा मिनिटे मोठ्याने वाचन केल्यास उच्चार स्पष्ट होतात आणि आत्मविश्वास वाढतो.',
+          'शेतकरी दादा पहाटे उठून शेतात जातात. ते खूप कष्ट करून आपल्या सर्वांसाठी धान्य व भाजीपाला पिकवतात.',
+          'पावसाळ्यात आकाशात काळे ढग जमतात. थंड वारा सुटतो आणि मोर आपला सुंदर पिसारा फुलवून आनंदाने नाचतो.',
+          'पुस्तके आपले खरे मित्र आहेत. गोष्टींची पुस्तके वाचल्याने आपली भाषा समृद्ध होते आणि नवे ज्ञान मिळते.',
+          'स्वच्छता हीच आरोग्याची गुरुकिल्ली आहे. आपण नेहमी जेवणापूर्वी साबणाने हात स्वच्छ धुतले पाहिजेत.',
+          'दिवाळी हा प्रकाशाचा आणि आनंदाचा सण आहे. या दिवशी अंगणात रांगोळी काढून पणत्या लावल्या जातात.',
+          'पाणी हेच जीवन आहे. आपण पाण्याचा प्रत्येक थेंब जपून वापरला पाहिजे आणि पाणी वाया घालवू नये.',
+          'खेळ खेळल्याने आपले शरीर मजबूत व तंदुरुस्त राहते. मैदानावर मित्रांसोबत खेळताना खूप आनंद मिळतो.'
+        ]
+      };
+
+      if (grade === 1) {
+        if (levelNum === 1 || levelNum === 2) return bank.letters;
+        if (levelNum === 3) return bank.twoLetter;
+        if (levelNum === 4) return bank.jodakshar;
+        return bank.shortSent;
+      }
+      if (grade === 2) {
+        if (levelNum <= 3) return bank.twoLetter;
+        if (levelNum <= 5) return bank.shortSent;
+        return Array.from({ length: 20 }, (_, i) => bank.longPassages[i % bank.longPassages.length]);
+      }
+      // Grades 3-5
+      if (levelNum === 1) return bank.letters;
+      if (levelNum === 2) return bank.jodakshar;
+      if (levelNum <= 4) return bank.shortSent;
+      return Array.from({ length: 20 }, (_, i) => bank.longPassages[i % bank.longPassages.length]);
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. MATHEMATICS 20-QUESTION GENERATOR PER DOMAIN & LEVEL
+    // -------------------------------------------------------------------------
+    function getMathQuestion(grade, domain, levelNum, qIdx) {
+      const seed = (grade * 100) + (levelNum * 25) + qIdx;
+
+      if (domain === 'अवकाशीय संबोध') {
+        const items = [
+          { q: 'झाडाच्या ____ सावली असते.', opts: ['खाली', 'वर', 'आत', 'दूर'], ans: 0 },
+          { q: 'पक्षी आकाशात ____ उडतात.', opts: ['खाली', 'वर', 'आत', 'मागे'], ans: 1 },
+          { q: 'पुस्तक दप्तराच्या ____ ठेवतात.', opts: ['बाहेर', 'आत', 'दूर', 'खाली'], ans: 1 },
+          { q: 'चेंडू टेबलाच्या ____ पडला आहे.', opts: ['आत', 'खाली', 'दूर', 'डावीकडे'], ans: 1 },
+          { q: 'शाळेचा ध्वज इमारतीच्या ____ आहे.', opts: ['वर', 'खाली', 'आत', 'मागे'], ans: 0 }
+        ];
+        return items[qIdx % items.length];
+      }
+
+      if (domain === 'आकार') {
+        const items = [
+          { q: 'चेंडूचा आकार कसा असतो?', opts: ['गोल (वर्तुळ)', 'त्रिकोण', 'चौरस', 'आयत'], ans: 0 },
+          { q: 'त्रिकोणाला किती कोपरे असतात?', opts: ['२', '३', '४', '५'], ans: 1 },
+          { q: 'चौरसाला किती समान बाजू असतात?', opts: ['३', '४', '५', '२'], ans: 1 },
+          { q: 'समोस्याचा आकार कोणत्या आकारासारखा दिसतो?', opts: ['वर्तुळ', 'त्रिकोण', 'चौरस', 'गोल'], ans: 1 },
+          { q: 'नाण्याचा आकार कसा असतो?', opts: ['वर्तुळ', 'त्रिकोण', 'आयत', 'चौरस'], ans: 0 }
+        ];
+        return items[qIdx % items.length];
+      }
+
+      if (domain === 'आकृतिबंध') {
+        const step = (qIdx % 4) + 2;
+        const start = (qIdx % 5) + 1;
+        const n1 = start, n2 = start + step, n3 = start + step * 2, ansVal = start + step * 3;
+        const opts = [ansVal, ansVal + 1, ansVal - 1, ansVal + step].map(toMr);
+        return { q: `पुढील संख्या ओळखा : ${toMr(n1)}, ${toMr(n2)}, ${toMr(n3)}, ?`, opts, ans: 0 };
+      }
+
+      if (domain === 'चलनी व्यवहार') {
+        const maxAmt = grade === 1 ? 20 : (grade === 2 ? 100 : 500);
+        const a = Math.min(maxAmt - 5, ((qIdx + 1) * 5) % (maxAmt / 2) + 5);
+        const b = Math.min(maxAmt - a, ((qIdx + 2) * 5) % (maxAmt / 2) + 5);
+        const ansVal = a + b;
+        const opts = [ansVal, ansVal + 5, Math.max(1, ansVal - 5), ansVal + 10].map(v => `₹ ${toMr(v)}`);
+        return { q: `तुझ्याकडे ₹${toMr(a)} आहेत. आईने अजून ₹${toMr(b)} दिले, तर एकूण किती रुपये झाले?`, opts, ans: 0 };
+      }
+
+      if (domain === 'मापन') {
+        const items = [
+          { q: 'कापडाची लांबी मोजण्यासाठी कोणते प्रमाणित एकक वापरतात?', opts: ['मीटर', 'किलोग्रॅम', 'लिटर', 'तास'], ans: 0 },
+          { q: 'दूध किंवा तेल मोजण्यासाठी कोणते एकक वापरतात?', opts: ['मीटर', 'लिटर', 'ग्रॅम', 'सेमी'], ans: 1 },
+          { q: 'साखर किंवा गहू यांचे वजन कशात मोजतात?', opts: ['लिटर', 'मीटर', 'किलोग्रॅम', 'वीत'], ans: 2 },
+          { q: 'पेन्सिलची लांबी मोजण्यासाठी कोणते एकक योग्य आहे?', opts: ['सेंटीमीटर', 'किलोमीटर', 'लिटर', 'किलोग्रॅम'], ans: 0 },
+          { q: 'जड व हलक्या वस्तूंची तुलना करण्यासाठी काय वापरतात?', opts: ['तराजू', 'पट्टी', 'घड्याळ', 'कप'], ans: 0 }
+        ];
+        return items[qIdx % items.length];
+      }
+
+      if (domain === 'संख्याज्ञान') {
+        const maxN = grade === 1 ? 20 : (grade === 2 ? 99 : 999);
+        const n = ((seed * 7) % (maxN - 2)) + 1;
+        const ansVal = n + 1;
+        const opts = [ansVal, n - 1, n + 2, n + 3].map(toMr);
+        return { q: `${toMr(n)} या संख्येच्या लगतची पुढची संख्या कोणती?`, opts, ans: 0 };
+      }
+
+      // Default: संख्यांवरील क्रिया (Addition / Subtraction / Multiplication)
+      const isSub = (levelNum % 2 === 0);
+      const limit = grade === 1 ? 9 : (grade === 2 ? 45 : 250);
+      const a = ((qIdx + 3) * (grade === 3 ? 11 : 2)) % limit + 3;
+      const b = ((qIdx + 1) * (grade === 3 ? 7 : 1)) % Math.max(2, a - 1) + 1;
+
+      if (grade >= 3 && levelNum >= 13) {
+        const m1 = (qIdx % 9) + 2;
+        const m2 = ((qIdx + 2) % 8) + 2;
+        const ansVal = m1 * m2;
+        const opts = [ansVal, ansVal + m1, Math.max(1, ansVal - m1), ansVal + 2].map(toMr);
+        return { q: `गुणाकार करा : ${toMr(m1)} × ${toMr(m2)} = ?`, opts, ans: 0 };
+      }
+
+      if (isSub) {
+        const big = Math.max(a, b);
+        const small = Math.min(a, b);
+        const ansVal = big - small;
+        const opts = [ansVal, ansVal + 1, ansVal + 2, Math.max(0, ansVal - 1)].map(toMr);
+        return { q: `वजाबाकी करा : ${toMr(big)} - ${toMr(small)} = ?`, opts, ans: 0 };
+      } else {
+        const ansVal = a + b;
+        const opts = [ansVal, ansVal + 1, Math.max(1, ansVal - 1), ansVal + 2].map(toMr);
+        return { q: `बेरीज करा : ${toMr(a)} + ${toMr(b)} = ?`, opts, ans: 0 };
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. AUDIO, SPEECH SYNTHESIS & LIVE MIC RECORDING (MediaRecorder + ASR)
+    // -------------------------------------------------------------------------
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recognition = null;
+    let recognizedTranscript = '';
+    let isMicPaused = false;
+
+    function speakMarathi(text, rate = 0.88) {
+      try {
+        if (!('speechSynthesis' in window)) {
+          showToast('🔊 या ब्राउझरमध्ये ऑडिओ वाचन उपलब्ध नाही.');
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang = 'mr-IN';
+        utt.rate = rate;
+        window.speechSynthesis.speak(utt);
+      } catch (_) {}
+    }
+
+    function stopAllAudioAndMic() {
+      try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
+      try {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        }
+      } catch (_) {}
+      try { if (recognition) recognition.stop(); } catch (_) {}
+      mediaRecorder = null;
+      recognition = null;
+      isMicPaused = false;
+    }
+
+    async function startMic(targetText, isOral = false) {
+      stopAllAudioAndMic();
+      recognizedTranscript = '';
+      audioChunks = [];
+
+      const wave = document.getElementById('waveBox');
+      const btnStart = document.getElementById('btnRecStart');
+      const btnPause = document.getElementById('btnRecPause');
+      const btnStop = document.getElementById('btnRecStop');
+      const hint = document.getElementById('readHint');
+
+      if (wave) wave.classList.add('wave-active');
+      if (btnStart) btnStart.disabled = true;
+      if (btnPause) { btnPause.disabled = false; btnPause.innerHTML = '<span>⏸️</span><span>थांबवा</span>'; }
+      if (btnStop) btnStop.disabled = false;
+      if (hint) hint.textContent = '🎙️ रेकॉर्डिंग सुरू आहे... मोठ्याने व स्पष्ट बोला.';
+
+      // Start SpeechRecognition (mr-IN) if supported
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SR) {
+        try {
+          recognition = new SR();
+          recognition.lang = 'mr-IN';
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.onresult = (e) => {
+            let txt = '';
+            for (let i = 0; i < e.results.length; i++) {
+              txt += e.results[i][0].transcript + ' ';
+            }
+            recognizedTranscript = txt.trim();
+            if (hint && recognizedTranscript) {
+              hint.textContent = `🗣️ ऐकले: "${recognizedTranscript}"`;
+            }
+          };
+          recognition.start();
+        } catch (_) {}
+      }
+
+      // Start MediaRecorder for Audio Playback
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const player = document.getElementById('recPlayer');
+            if (player && audioChunks.length > 0) {
+              player.src = URL.createObjectURL(blob);
+              player.classList.remove('hidden');
+            }
+            stream.getTracks().forEach(t => t.stop());
+          };
+          mediaRecorder.start();
+        } catch (_) {
+          if (!SR && hint) hint.textContent = '🎙️ माईक परवानगी द्या किंवा मोठ्याने सराव करा.';
+        }
+      }
+    }
+
+    function pauseResumeMic() {
+      const btnPause = document.getElementById('btnRecPause');
+      const wave = document.getElementById('waveBox');
+      if (!isMicPaused) {
+        isMicPaused = true;
+        try { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.pause(); } catch (_) {}
+        if (wave) wave.classList.remove('wave-active');
+        if (btnPause) btnPause.innerHTML = '<span>▶️</span><span>सुरू</span>';
+      } else {
+        isMicPaused = false;
+        try { if (mediaRecorder && mediaRecorder.state === 'paused') mediaRecorder.resume(); } catch (_) {}
+        if (wave) wave.classList.add('wave-active');
+        if (btnPause) btnPause.innerHTML = '<span>⏸️</span><span>थांबवा</span>';
+      }
+    }
+
+    function finishMic(targetText, isOral = false) {
+      const wave = document.getElementById('waveBox');
+      const btnStart = document.getElementById('btnRecStart');
+      const btnPause = document.getElementById('btnRecPause');
+      const btnStop = document.getElementById('btnRecStop');
+      const hint = document.getElementById('readHint');
+
+      try { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch (_) {}
+      try { if (recognition) recognition.stop(); } catch (_) {}
+      if (wave) wave.classList.remove('wave-active');
+      if (btnStart) btnStart.disabled = false;
+      if (btnPause) btnPause.disabled = true;
+      if (btnStop) btnStop.disabled = true;
+
+      const qKey = `${state.grade}_${state.subject}_${state.domain}_${state.levelNum}_${state.qIdx}`;
+      markQuestionSolved(qKey);
+
+      if (isOral) {
+        if (hint) hint.textContent = '🌟 शाब्बास! छान बोललास! (+५ तारे)';
+        showToast('🌟 छान प्रयत्न! +५ तारे मिळाले!');
+        return;
+      }
+
+      // Calculate reading accuracy
+      const targetWords = targetText.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
+      const spokenWords = recognizedTranscript.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
+      let matched = 0;
+      targetWords.forEach(w => {
+        if (spokenWords.some(sw => sw.includes(w) || w.includes(sw))) matched++;
+      });
+      const pct = recognizedTranscript ? Math.round((matched / Math.max(1, targetWords.length)) * 100) : 85;
+      if (hint) {
+        hint.textContent = pct >= 80
+          ? `🟢 अचूकता ${toMr(pct)}% • निपुण वाचन! (+५ तारे)`
+          : `🟡 अचूकता ${toMr(pct)}% • खूप छान प्रयत्न! पुन्हा एकदा वाचून पहा.`;
+      }
+      showToast(`🎙️ वाचन पूर्ण! अचूकता: ${toMr(pct)}%`);
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. GRADE 1 DIGITAL SLATE (पाटी) & GRADES 2-5 TESSERACT MARATHI OCR
+    // -------------------------------------------------------------------------
+    function initGrade1Slate() {
+      const canvas = document.getElementById('slateCanvas');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.max(260, Math.floor(rect.width - 8));
+      canvas.height = Math.max(130, Math.floor(rect.height - 8));
+      const ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      let drawing = false;
+      const getPos = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const touch = e.touches ? e.touches[0] : e;
+        return { x: touch.clientX - r.left, y: touch.clientY - r.top };
+      };
+      const start = (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); };
+      const move = (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); };
+      const end = () => { drawing = false; };
+
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', end);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      canvas.addEventListener('touchend', end);
+    }
+
+    function clearGrade1Slate() {
+      const canvas = document.getElementById('slateCanvas');
+      if (!canvas) return;
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    let currentOcrTarget = '';
+    function triggerOcrUpload(targetText) {
+      currentOcrTarget = targetText;
+      const inp = document.getElementById('ocrFileInput');
+      if (inp) { inp.value = ''; inp.click(); }
+    }
+
+    async function handleOcrUpload(event) {
+      const file = event.target && event.target.files && event.target.files[0];
+      if (!file) return;
+      const resBox = document.getElementById('ocrResultBox');
+      if (resBox) {
+        resBox.classList.remove('hidden');
+        resBox.innerHTML = '<div class="text-teal-800 font-extrabold">⏳ मराठी OCR तपासणी सुरू आहे... कृपया थांबा.</div>';
+      }
+
+      try {
+        if (typeof Tesseract === 'undefined') {
+          throw new Error('Tesseract offline');
+        }
+        const { data: { text } } = await Tesseract.recognize(file, 'mar');
+        const cleanedOcr = (text || '').replace(/\s+/g, ' ').trim();
+        const targetWords = currentOcrTarget.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
+        const ocrWords = cleanedOcr.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);
+
+        let matched = 0;
+        targetWords.forEach(w => {
+          if (ocrWords.some(ow => ow.includes(w) || w.includes(ow))) matched++;
+        });
+        const pct = Math.round((matched / Math.max(1, targetWords.length)) * 100);
+        const isNipun = pct >= 80;
+        if (isNipun) {
+          markQuestionSolved(`${state.grade}_${state.subject}_${state.domain}_${state.levelNum}_${state.qIdx}`);
+        }
+        if (resBox) {
+          resBox.innerHTML = `
+            <div class="font-extrabold ${isNipun ? 'text-emerald-700' : 'text-amber-700'}">
+              ${isNipun ? '🟢 निपुण प्राप्त!' : '🟡 पुन्हा सराव करा'} • अचूकता: ${toMr(pct)}% (निकष: ८०%)
+            </div>
+            <div class="text-[10.5px] text-slate-600 truncate mt-0.5">OCR मजकूर: ${cleanedOcr || 'स्पष्ट अक्षर आढळले नाही'}</div>
+          `;
+        }
+      } catch (_) {
+        if (resBox) {
+          resBox.innerHTML = '<div class="text-amber-800 font-extrabold">⚠️ ऑफलाइन मोड: इंटरनेट उपलब्ध झाल्यावर OCR तपासणी होईल.</div>';
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. NAVIGATION & SCREEN RENDERING
+    // -------------------------------------------------------------------------
+    function goToScreen(num) {
+      stopAllAudioAndMic();
+      state.screen = num;
+      state.role = 'STUDENT';
+      const roleSel = document.getElementById('roleSelect');
+      if (roleSel) roleSel.value = 'STUDENT';
+
+      // Hide all sections
+      ['screen0', 'screen1', 'screen2', 'screen3', 'screen4', 'screenTeacher', 'screenParent'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+
+      const header = document.getElementById('appHeader');
+      if (num === 0) {
+        header.classList.add('hidden');
+        document.getElementById('screen0').classList.remove('hidden');
+      } else {
+        header.classList.remove('hidden');
+        document.getElementById('studentNavBar').classList.remove('hidden');
+        document.getElementById('screen' + num).classList.remove('hidden');
+      }
+
+      // Highlight active nav pill
+      [0, 1, 2, 3].forEach(i => {
+        const btn = document.getElementById('navBtn' + i);
+        if (btn) btn.classList.toggle('active', (num - 1) === i);
+      });
+
+      if (num === 1) renderScreen1();
+      if (num === 2) renderScreen2();
+      if (num === 3) renderScreen3();
+      if (num === 4) renderScreen4();
+    }
+
+    function handlePrevNav() {
+      if (state.screen === 4) {
+        if (state.qIdx > 0) {
+          state.qIdx--;
+          renderScreen4();
+        } else {
+          goToScreen(3);
+        }
+      } else if (state.screen > 1) {
+        goToScreen(state.screen - 1);
+      } else {
+        goToScreen(0);
+      }
+    }
+
+    function handleNextNav() {
+      if (state.screen === 4) {
+        if (state.qIdx < 19) {
+          state.qIdx++;
+          renderScreen4();
+        } else {
+          showToast('🎉 सर्व २० प्रश्न पूर्ण झाले! शाब्बास!');
+        }
+      } else if (state.screen === 1) {
+        saveProfileAndNext();
+      } else if (state.screen === 2) {
+        goToScreen(3);
+      } else if (state.screen === 3) {
+        startPractice(state.mode);
+      }
+    }
+
+    function switchRole(role) {
+      stopAllAudioAndMic();
+      state.role = role;
+      ['screen0', 'screen1', 'screen2', 'screen3', 'screen4', 'screenTeacher', 'screenParent'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById('appHeader').classList.remove('hidden');
+
+      if (role === 'TEACHER') {
+        document.getElementById('studentNavBar').classList.add('hidden');
+        document.getElementById('screenTeacher').classList.remove('hidden');
+        renderTeacher();
+      } else if (role === 'PARENT') {
+        document.getElementById('studentNavBar').classList.add('hidden');
+        document.getElementById('screenParent').classList.remove('hidden');
+        renderParent();
+      } else {
+        goToScreen(state.screen || 1);
+      }
+    }
+
+    function renderScreen1() {
+      document.getElementById('inpStudentName').value = state.studentName;
+      document.getElementById('inpSchoolName').value = state.schoolName || 'जिल्हा परिषद प्राथमिक शाळा ईळदा';
+      document.getElementById('loginStarCount').textContent = toMr(state.stars);
+
+      const grp = document.getElementById('gradeBtnGroup');
+      const labels = ['१ ली', '२ री', '३ री', '४ थी', '५ वी'];
+      grp.innerHTML = labels.map((lbl, idx) => {
+        const g = idx + 1;
+        const active = state.grade === g;
+        return `
+          <button type="button" onclick="selectGrade(${g})"
+            class="touch-btn py-2 rounded-xl border-2 text-xs font-extrabold ${
+              active ? 'bg-teal-700 text-white border-teal-800 shadow' : 'bg-white text-slate-800 border-amber-300'
+            }">
+            इ. ${lbl}
+          </button>`;
+      }).join('');
+    }
+
+    function selectGrade(g) {
+      state.grade = g;
+      saveState();
+      renderScreen1();
+    }
+
+    function saveProfileAndNext() {
+      const sName = document.getElementById('inpStudentName').value.trim();
+      const schName = document.getElementById('inpSchoolName').value.trim();
+      state.studentName = sName || 'विद्यार्थी';
+      state.schoolName = schName || 'जिल्हा परिषद प्राथमिक शाळा ईळदा';
+      saveState();
+      goToScreen(2);
+    }
+
+    function renderScreen2() {
+      const labels = ['', '१ ली', '२ री', '३ री', '४ थी', '५ वी'];
+      document.getElementById('subjStudentBadge').textContent = `${state.studentName || 'विद्यार्थी'} • इयत्ता ${labels[state.grade]}`;
+      document.getElementById('marathiSubDomainsHint').textContent = state.grade <= 2 ? 'मौखिक भाषा • वाचन • लेखन' : 'वाचन • लेखन';
+    }
+
+    function selectSubject(subj) {
+      state.subject = subj;
+      const domObj = getCurriculumForGrade(subj, state.grade);
+      state.domain = Object.keys(domObj)[0];
+      state.levelNum = 1;
+      goToScreen(3);
+    }
+
+    function renderScreen3() {
+      const labels = ['', '१ ली', '२ री', '३ री', '४ थी', '५ वी'];
+      const subjName = state.subject === 'MARATHI' ? 'मराठी भाषा' : 'गणित';
+      document.getElementById('domainHeaderBadge').textContent = `इयत्ता ${labels[state.grade]} • ${subjName}`;
+
+      const domObj = getCurriculumForGrade(state.subject, state.grade);
+      const domains = Object.keys(domObj);
+      if (!domains.includes(state.domain)) state.domain = domains[0];
+
+      const grid = document.getElementById('domainButtonsGrid');
+      grid.innerHTML = domains.map(d => {
+        const active = d === state.domain;
+        return `
+          <button type="button" onclick="selectDomain('${d}')"
+            class="touch-btn py-2 px-2 rounded-xl border-2 text-xs font-extrabold truncate ${
+              active ? 'bg-orange-600 text-white border-orange-700 shadow' : 'bg-white text-slate-800 border-amber-200'
+            }">
+            ${d}
+          </button>`;
+      }).join('');
+
+      const levels = domObj[state.domain] || [];
+      if (state.levelNum > levels.length) state.levelNum = 1;
+      const sel = document.getElementById('levelSelect');
+      sel.innerHTML = levels.map((txt, idx) => `<option value="${idx + 1}" ${state.levelNum === idx + 1 ? 'selected' : ''}>${txt}</option>`).join('');
+    }
+
+    function selectDomain(d) {
+      state.domain = d;
+      state.levelNum = 1;
+      renderScreen3();
+    }
+
+    function onLevelChange(val) {
+      state.levelNum = Number(val) || 1;
+    }
+
+    function startPractice(mode) {
+      state.mode = mode;
+      state.qIdx = 0;
+      goToScreen(4);
+    }
+
+    // -------------------------------------------------------------------------
+    // 11. SCREEN 4: SPECIALIZED PRACTICE WORKSPACE (20 QUESTIONS PER LEVEL)
+    // -------------------------------------------------------------------------
+    function renderScreen4() {
+      const ws = document.getElementById('practiceWorkspace');
+      const qNo = state.qIdx + 1;
+      const modeLabel = state.mode === 'ASSESSMENT' ? '✅ चाचणी' : '🎯 सराव';
+
+      // A. MARATHI -> ORAL LANGUAGE (मौखिक भाषा)
+      if (state.subject === 'MARATHI' && state.domain === 'मौखिक भाषा') {
+        const isPictureLevel = (state.grade === 1 && (state.levelNum === 1 || state.levelNum === 2)) || (state.grade === 2 && state.levelNum === 3);
+
+        // A1. PICTURE-BASED LEVELS ONLY (G1 L1, G1 L2, G2 L3)
+        if (isPictureLevel) {
+          const photo = ORAL_HD_PHOTOS[state.qIdx % ORAL_HD_PHOTOS.length];
+          const isSecondPass = state.qIdx >= ORAL_HD_PHOTOS.length;
+          const activeHints = isSecondPass ? photo.hints2 : photo.hints1;
+          const qText = isSecondPass ? photo.q2 : photo.q1;
+          const hasSaved = Boolean(oralImageCache[photo.id]);
+          const imgSrc = hasSaved ? oralImageCache[photo.id] : buildOfflineSvgFallback(photo);
+          const safePrompt = qText.replace(/`/g, '');
+
+          ws.innerHTML = `
+            <div class="cream-card flex-1 flex flex-col min-h-0 p-2 sm:p-3 gap-1.5 border-2 border-teal-400">
+              <div class="shrink-0 flex items-center justify-between gap-1.5">
+                <span class="px-2 py-0.5 rounded-full bg-teal-700 text-white text-[10.5px] font-extrabold truncate">
+                  ${modeLabel} • मौखिक भाषा (स्तर ${toMr(state.levelNum)})
+                </span>
+                <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[10.5px] font-extrabold border border-amber-300 shrink-0">
+                  प्रश्न ${toMr(qNo)} / २०
+                </span>
+              </div>
+
+              <div class="shrink-0 flex items-center gap-1">
+                <button type="button" onclick="triggerBulkOralUpload()" class="touch-btn flex-1 py-1 px-2 rounded-lg bg-orange-600 text-white text-[10.5px] font-extrabold truncate">🖼️ १० चित्रे जोडा</button>
+                <button type="button" onclick="triggerSingleOralUpload('${photo.id}')" class="touch-btn py-1 px-2 rounded-lg bg-teal-700 text-white text-[10.5px] font-extrabold shrink-0">📷 बदला</button>
+                <button type="button" onclick="openGalleryModal()" class="touch-btn py-1 px-2 rounded-lg bg-amber-100 text-amber-950 border border-amber-300 text-[10.5px] font-extrabold shrink-0">⚙️ गॅलरी</button>
+              </div>
+
+              <div class="flex-1 min-h-0 relative rounded-xl overflow-hidden border-2 border-amber-300 bg-amber-50/70 flex items-center justify-center">
+                <img src="${imgSrc}" alt="${photo.title}" class="w-full h-full object-contain" />
+                <div class="absolute bottom-1 left-1.5 px-2 py-0.5 rounded-full bg-slate-900/75 text-white text-[10px] font-extrabold">
+                  🖼️ ${photo.title} ${hasSaved ? '✓' : ''}
+                </div>
+              </div>
+
+              <div class="shrink-0 px-2.5 py-1.5 rounded-xl bg-white border border-amber-200 text-center text-xs sm:text-sm font-extrabold text-slate-900">
+                ${qText}
+              </div>
+
+              <div class="shrink-0 flex flex-wrap items-center justify-center gap-1">
+                <span class="text-[10px] font-extrabold text-teal-800">मदत शब्द:</span>
+                ${activeHints.map(h => `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[10.5px] font-extrabold">${h}</span>`).join('')}
+              </div>
+
+              <div class="shrink-0 flex items-center justify-center gap-2 h-4">
+                <div id="waveBox" class="flex items-center justify-center gap-[3px] h-4">
+                  ${Array(14).fill('<span class="wave-bar"></span>').join('')}
+                </div>
+                <audio id="recPlayer" controls class="hidden h-6 max-w-[170px]"></audio>
+              </div>
+
+              <div class="shrink-0 audio-grid-4">
+                <button type="button" onclick="speakMarathi(\`${safePrompt}\`)" class="audio-ctrl-btn bg-amber-500 text-white"><span>🔊</span><span>प्रश्न ऐका</span></button>
+                <button id="btnRecStart" type="button" onclick="startMic(\`${safePrompt}\`, true)" class="audio-ctrl-btn bg-emerald-600 text-white"><span>🎙️</span><span>सुरू करा</span></button>
+                <button id="btnRecPause" type="button" onclick="pauseResumeMic()" disabled class="audio-ctrl-btn bg-teal-600 text-white"><span>⏸️</span><span>थांबवा</span></button>
+                <button id="btnRecStop" type="button" onclick="finishMic(\`${safePrompt}\`, true)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>बंद करा</span></button>
+              </div>
+
+              <div id="readHint" class="shrink-0 px-2 py-1 rounded-lg bg-teal-50 border border-teal-200 text-center text-[11px] font-extrabold text-teal-950 truncate">
+                🎙️ चित्र पहा व माईक सुरू करून तुमचे उत्तर बोला.
+              </div>
+            </div>`;
+          return;
+        }
+
+        // A2. NON-PICTURE: G1 L3 (बडबडगीते) & G2 L1 (कविता)
+        if ((state.grade === 1 && state.levelNum === 3) || (state.grade === 2 && state.levelNum === 1)) {
+          const item = (state.grade === 1 ? ORAL_RHYMES_G1 : ORAL_POEMS_G2)[state.qIdx % 20];
+          const safeLines = item.lines.replace(/\n/g, ' ');
+          ws.innerHTML = `
+            <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2 border-2 border-orange-400">
+              <div class="shrink-0 flex items-center justify-between">
+                <span class="px-2.5 py-0.5 rounded-full bg-orange-600 text-white text-[11px] font-extrabold">🎵 ${state.grade === 1 ? 'बडबडगीत' : 'बालकविता'}</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[11px] font-extrabold border border-amber-300">प्रश्न ${toMr(qNo)} / २०</span>
+              </div>
+
+              <div class="flex-1 min-h-0 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 p-4 flex flex-col items-center justify-center text-center gap-2">
+                <div class="text-base sm:text-lg font-black text-orange-700">🎶 ${item.title}</div>
+                <div class="text-base sm:text-xl font-extrabold text-slate-900 whitespace-pre-line leading-relaxed">${item.lines}</div>
+              </div>
+
+              <div class="shrink-0 flex items-center justify-center gap-2 h-4">
+                <div id="waveBox" class="flex items-center justify-center gap-[3px] h-4">${Array(14).fill('<span class="wave-bar"></span>').join('')}</div>
+                <audio id="recPlayer" controls class="hidden h-6 max-w-[170px]"></audio>
+              </div>
+
+              <div class="shrink-0 audio-grid-4">
+                <button type="button" onclick="speakMarathi(\`${safeLines}\`, 0.82)" class="audio-ctrl-btn bg-amber-500 text-white"><span>🔊</span><span>गीत ऐका</span></button>
+                <button id="btnRecStart" type="button" onclick="startMic(\`${safeLines}\`, true)" class="audio-ctrl-btn bg-emerald-600 text-white"><span>🎙️</span><span>सुरू करा</span></button>
+                <button id="btnRecPause" type="button" onclick="pauseResumeMic()" disabled class="audio-ctrl-btn bg-teal-600 text-white"><span>⏸️</span><span>थांबवा</span></button>
+                <button id="btnRecStop" type="button" onclick="finishMic(\`${safeLines}\`, true)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>बंद करा</span></button>
+              </div>
+
+              <div id="readHint" class="shrink-0 px-2 py-1 rounded-lg bg-teal-50 border border-teal-200 text-center text-[11px] font-extrabold text-teal-950">
+                🎵 गीत ऐका आणि तालासुरात मोठ्याने म्हणा.
+              </div>
+            </div>`;
+          return;
+        }
+
+        // A3. NON-PICTURE: G2 L2 (शब्द पुनरावृत्ती)
+        if (state.grade === 2 && state.levelNum === 2) {
+          const words = ORAL_WORD_ECHO_G2[state.qIdx % 20];
+          const joined = words.join(', ');
+          ws.innerHTML = `
+            <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2 border-2 border-teal-400">
+              <div class="shrink-0 flex items-center justify-between">
+                <span class="px-2.5 py-0.5 rounded-full bg-teal-700 text-white text-[11px] font-extrabold">🗣️ शब्द पुनरावृत्ती</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[11px] font-extrabold border border-amber-300">प्रश्न ${toMr(qNo)} / २०</span>
+              </div>
+
+              <div class="flex-1 min-h-0 rounded-2xl bg-white border-2 border-teal-200 p-3 flex flex-wrap items-center justify-center content-center gap-3">
+                ${words.map(w => `
+                  <button type="button" onclick="speakMarathi('${w}', 0.78)"
+                    class="touch-btn px-4 py-3 rounded-2xl bg-amber-50 hover:bg-emerald-100 border-2 border-amber-300 text-xl sm:text-2xl font-black text-slate-900 shadow-sm">
+                    ${w}
+                  </button>`).join('')}
+              </div>
+
+              <div class="shrink-0 flex items-center justify-center gap-2 h-4">
+                <div id="waveBox" class="flex items-center justify-center gap-[3px] h-4">${Array(14).fill('<span class="wave-bar"></span>').join('')}</div>
+                <audio id="recPlayer" controls class="hidden h-6 max-w-[170px]"></audio>
+              </div>
+
+              <div class="shrink-0 audio-grid-4">
+                <button type="button" onclick="speakMarathi('${joined}', 0.72)" class="audio-ctrl-btn bg-amber-500 text-white"><span>🔊</span><span>शब्द ऐका</span></button>
+                <button id="btnRecStart" type="button" onclick="startMic('${joined}', false)" class="audio-ctrl-btn bg-emerald-600 text-white"><span>🎙️</span><span>सुरू करा</span></button>
+                <button id="btnRecPause" type="button" onclick="pauseResumeMic()" disabled class="audio-ctrl-btn bg-teal-600 text-white"><span>⏸️</span><span>थांबवा</span></button>
+                <button id="btnRecStop" type="button" onclick="finishMic('${joined}', false)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>बंद करा</span></button>
+              </div>
+
+              <div id="readHint" class="shrink-0 px-2 py-1 rounded-lg bg-teal-50 border border-teal-200 text-center text-[11px] font-extrabold text-teal-950">
+                🗣️ शब्द ऐका आणि मोठ्याने पुन्हा म्हणा.
+              </div>
+            </div>`;
+          return;
+        }
+
+        // A4. NON-PICTURE: G2 L4 (शिक्षकांच्या सूचनांचे पालन)
+        const inst = ORAL_INSTRUCTIONS_G2[state.qIdx % 20];
+        ws.innerHTML = `
+          <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2.5 border-2 border-teal-400">
+            <div class="shrink-0 flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full bg-teal-700 text-white text-[11px] font-extrabold">✅ सूचनांचे पालन</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[11px] font-extrabold border border-amber-300">प्रश्न ${toMr(qNo)} / २०</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-center flex flex-col items-center gap-2">
+              <div class="text-base sm:text-lg font-black text-slate-900">${inst.text}</div>
+              <button type="button" onclick="speakMarathi('${inst.text}', 0.85)"
+                class="touch-btn px-4 py-1.5 rounded-full bg-amber-500 text-white text-xs font-extrabold shadow">
+                🔊 सूचना ऐका
+              </button>
+            </div>
+
+            <div class="flex-1 min-h-0 flex flex-col justify-center gap-2">
+              ${inst.choices.map((ch, idx) => `
+                <button type="button" onclick="checkMcqChoice(this, ${idx}, ${inst.ans})"
+                  class="touch-btn w-full py-3 px-4 rounded-xl bg-white border-2 border-teal-300 text-sm sm:text-base font-extrabold text-slate-900 shadow-sm text-left">
+                  ${ch}
+                </button>`).join('')}
+            </div>
+
+            <div id="mcqFeedback" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-teal-50 border border-teal-200 text-center text-xs font-extrabold text-teal-900">
+              👆 सूचना ऐका व योग्य कृती निवडा.
+            </div>
+          </div>`;
+        return;
+      }
+
+      // B. MARATHI -> READING (वाचन)
+      if (state.subject === 'MARATHI' && state.domain === 'वाचन') {
+        const items = getReadingItems(state.grade, state.levelNum);
+        const text = items[state.qIdx % items.length];
+        const safeText = text.replace(/`/g, '');
+        const isLong = text.length > 45;
+
+        ws.innerHTML = `
+          <div class="cream-card flex-1 flex flex-col min-h-0 p-2.5 sm:p-3 gap-2 border-2 border-teal-400">
+            <div class="shrink-0 flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full bg-teal-700 text-white text-[11px] font-extrabold">${modeLabel} • वाचन (स्तर ${toMr(state.levelNum)})</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[11px] font-extrabold border border-amber-300">प्रश्न ${toMr(qNo)} / २०</span>
+            </div>
+
+            <div class="flex-1 min-h-0 rounded-2xl bg-white border-2 border-amber-300 p-3 sm:p-4 flex items-center justify-center text-center overflow-y-auto thin-scroll">
+              <div class="${isLong ? 'text-base sm:text-xl leading-relaxed' : 'text-2xl sm:text-4xl leading-snug'} font-black text-slate-900">
+                ${text}
+              </div>
+            </div>
+
+            <div class="shrink-0 flex items-center justify-center gap-2 h-4">
+              <div id="waveBox" class="flex items-center justify-center gap-[3px] h-4">${Array(14).fill('<span class="wave-bar"></span>').join('')}</div>
+              <audio id="recPlayer" controls class="hidden h-6 max-w-[175px]"></audio>
+            </div>
+
+            <!-- Compact 4-Button Single Row -->
+            <div class="shrink-0 audio-grid-4">
+              <button type="button" onclick="speakMarathi(\`${safeText}\`, 0.85)" class="audio-ctrl-btn bg-amber-500 text-white"><span>🔊</span><span>वाक्य ऐका</span></button>
+              <button id="btnRecStart" type="button" onclick="startMic(\`${safeText}\`, false)" class="audio-ctrl-btn bg-emerald-600 text-white"><span>🎙️</span><span>सुरू करा</span></button>
+              <button id="btnRecPause" type="button" onclick="pauseResumeMic()" disabled class="audio-ctrl-btn bg-teal-600 text-white"><span>⏸️</span><span>थांबवा</span></button>
+              <button id="btnRecStop" type="button" onclick="finishMic(\`${safeText}\`, false)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>बंद करा</span></button>
+            </div>
+
+            <div id="readHint" class="shrink-0 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-center text-[11px] font-extrabold text-teal-950 truncate">
+              🎙️ 'सुरू करा' दाबून वरील मजकूर मोठ्याने वाचा.
+            </div>
+          </div>`;
+        return;
+      }
+
+      // C. MARATHI -> WRITING (लेखन)
+      if (state.subject === 'MARATHI' && state.domain === 'लेखन') {
+        const items = getReadingItems(state.grade, state.levelNum);
+        const text = items[state.qIdx % items.length];
+        const safeText = text.replace(/`/g, '');
+
+        // C1. GRADE 1 ONLY: DIGITAL SLATE (पाटी)
+        if (state.grade === 1) {
+          ws.innerHTML = `
+            <div class="cream-card flex-1 flex flex-col min-h-0 p-2.5 gap-2 border-2 border-orange-400">
+              <div class="shrink-0 flex items-center justify-between">
+                <span class="px-2.5 py-0.5 rounded-full bg-orange-600 text-white text-[11px] font-extrabold">✍️ इयत्ता १ ली • डिजिटल पाटी</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[11px] font-extrabold border border-amber-300">प्रश्न ${toMr(qNo)} / २०</span>
+              </div>
+
+              <div class="shrink-0 p-2 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between gap-2">
+                <div class="text-xl sm:text-2xl font-black text-slate-900 pl-2">${text}</div>
+                <div class="flex gap-1.5">
+                  <button type="button" onclick="speakMarathi(\`${safeText}\`, 0.78)" class="touch-btn px-2.5 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-extrabold">🔊 ऐका</button>
+                  <button type="button" onclick="clearGrade1Slate()" class="touch-btn px-2.5 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-extrabold">🧹 पुसा</button>
+                </div>
+              </div>
+
+              <div class="flex-1 min-h-0 relative">
+                <canvas id="slateCanvas" class="slate-canvas"></canvas>
+              </div>
+
+              <button type="button" onclick="markQuestionSolved('${state.grade}_W_${state.qIdx}'); showToast('🌟 शाब्बास! सुंदर लेखन! +५ तारे');"
+                class="touch-btn shrink-0 w-full py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold shadow">
+                ✅ लेखन पूर्ण झाले
+              </button>
+            </div>`;
+          setTimeout(initGrade1Slate, 40);
+          return;
+        }
+
+        // C2. GRADES 2-5: NO SLATE — DICTATION AUDIO + TESSERACT MARATHI OCR
+        ws.innerHTML = `
+          <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2 border-2 border-teal-400">
+            <div class="shrink-0 flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full bg-teal-700 text-white text-[11px] font-extrabold">✍️ श्रुतलेखन व OCR तपासणी</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[11px] font-extrabold border border-amber-300">प्रश्न ${toMr(qNo)} / २०</span>
+            </div>
+
+            <div class="flex-1 min-h-0 rounded-2xl bg-white border-2 border-amber-300 p-3 flex items-center justify-center text-center overflow-y-auto thin-scroll">
+              <div class="text-base sm:text-xl font-black text-slate-900 leading-relaxed">${text}</div>
+            </div>
+
+            <div class="shrink-0 grid grid-cols-2 gap-2">
+              <button type="button" onclick="speakMarathi(\`${safeText}\`, 0.65)" class="touch-btn py-2 rounded-xl bg-amber-500 text-white text-xs font-extrabold shadow">🐢 संथ गतीने ऐका</button>
+              <button type="button" onclick="speakMarathi(\`${safeText}\`, 0.88)" class="touch-btn py-2 rounded-xl bg-teal-600 text-white text-xs font-extrabold shadow">🔊 मध्यम गतीने ऐका</button>
+            </div>
+
+            <button type="button" onclick="triggerOcrUpload(\`${safeText}\`)"
+              class="touch-btn shrink-0 w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs sm:text-sm font-extrabold shadow-md">
+              📷 वहीचा फोटो अपलोड करा (मराठी OCR तपासणी)
+            </button>
+
+            <div id="ocrResultBox" class="hidden shrink-0 p-2 rounded-xl bg-teal-50 border border-teal-300 text-center text-xs"></div>
+          </div>`;
+        return;
+      }
+
+      // D. MATHEMATICS (गणित) — 20 INTERACTIVE MCQ QUESTIONS
+      const mq = getMathQuestion(state.grade, state.domain, state.levelNum, state.qIdx);
+      ws.innerHTML = `
+        <div class="cream-card flex-1 flex flex-col min-h-0 p-3 gap-2.5 border-2 border-teal-400">
+          <div class="shrink-0 flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full bg-teal-700 text-white text-[11px] font-extrabold">${modeLabel} • ${state.domain}</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[11px] font-extrabold border border-amber-300">प्रश्न ${toMr(qNo)} / २०</span>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-center flex flex-col items-center gap-2">
+            <div class="text-base sm:text-xl font-black text-slate-900">${mq.q}</div>
+            <button type="button" onclick="speakMarathi('${mq.q.replace(/'/g, '')}', 0.85)"
+              class="touch-btn px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-extrabold">🔊 प्रश्न ऐका</button>
+          </div>
+
+          <div class="flex-1 min-h-0 grid grid-cols-2 gap-2 content-center">
+            ${mq.opts.map((opt, idx) => `
+              <button type="button" onclick="checkMcqChoice(this, ${idx}, ${mq.ans})"
+                class="touch-btn py-3.5 px-3 rounded-2xl bg-white border-2 border-teal-300 text-base sm:text-lg font-black text-slate-900 shadow-sm">
+                ${opt}
+              </button>`).join('')}
+          </div>
+
+          <div id="mcqFeedback" class="shrink-0 px-3 py-1.5 rounded-xl bg-teal-50 border border-teal-200 text-center text-xs font-extrabold text-teal-900">
+            👆 योग्य पर्यायावर टॅप करा (चुकीचे उत्तर असले तरी गुण वजा होत नाहीत!).
+          </div>
+        </div>`;
+    }
+
+    function checkMcqChoice(btn, chosenIdx, correctIdx) {
+      const fb = document.getElementById('mcqFeedback');
+      if (chosenIdx === correctIdx) {
+        btn.classList.remove('bg-white', 'border-teal-300');
+        btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-700');
+        markQuestionSolved(`${state.grade}_${state.subject}_${state.domain}_${state.levelNum}_${state.qIdx}`);
+        if (fb) {
+          fb.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-emerald-100 border border-emerald-400 text-center text-xs font-extrabold text-emerald-900';
+          fb.textContent = '🌟 शाब्बास! अगदी अचूक उत्तर! (+५ तारे) पुढे जाण्यासाठी ➡️ दाबा.';
+        }
+        showToast('🌟 अचूक उत्तर! +५ तारे!');
+      } else {
+        btn.classList.add('bg-amber-100', 'border-amber-400');
+        if (fb) {
+          fb.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-amber-100 border border-amber-300 text-center text-xs font-extrabold text-amber-900';
+          fb.textContent = '😊 छान प्रयत्न! थोडा विचार करून पुन्हा प्रयत्न करा.';
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 12. TEACHER & PARENT DASHBOARDS
+    // -------------------------------------------------------------------------
+    function renderTeacher() {
+      document.getElementById('teacherSchoolSub').textContent = state.schoolName || 'जिल्हा परिषद प्राथमिक शाळा ईळदा';
+      document.getElementById('teacherStuName').textContent = `विद्यार्थी: ${state.studentName || 'नोंदवलेले नाही'} (इयत्ता ${toMr(state.grade)})`;
+      const isNipun = state.solved.length >= 10;
+      document.getElementById('teacherStuStats').textContent = `पूर्ण प्रश्न: ${toMr(state.solved.length)} • तारे: ${toMr(state.stars)} • ${isNipun ? '🟢 निपुण प्राप्त' : '🟡 प्रगतीपथावर'}`;
+      document.getElementById('teacherRagBadge').textContent = isNipun ? '🟢 निपुण प्राप्त' : '🟡 प्रगतीपथावर';
+      document.getElementById('tGreenCount').textContent = isNipun ? '१' : '०';
+      document.getElementById('tYellowCount').textContent = isNipun ? '०' : '१';
+      updateGalleryCounters();
+    }
+
+    function renderParent() {
+      document.getElementById('parentChildSub').textContent = `पाल्य: ${state.studentName || 'विद्यार्थी'} (इयत्ता ${toMr(state.grade)})`;
+      document.getElementById('parentProgressText').textContent = `पूर्ण प्रश्न: ${toMr(state.solved.length)} • मिळालेले तारे: ${toMr(state.stars)} ⭐`;
+    }
+
+    function shareProgressWhatsApp() {
+      const msg = `🌟 *निपुण बालमित्र 2.0 प्रगती अहवाल* 🌟\nविद्यार्थी: ${state.studentName || 'विद्यार्थी'} (इयत्ता ${toMr(state.grade)})\nशाळा: ${state.schoolName}\nपूर्ण सराव प्रश्न: ${toMr(state.solved.length)}\nमिळालेले तारे: ${toMr(state.stars)} ⭐\n- संकल्पना व निर्मिती: श्री. डी. के. देऊरमले (स. शिक्षक), जि. प. प्रा. शाळा ईळदा`;
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    }
+
+    // -------------------------------------------------------------------------
+    // 13. OFFLINE PWA MANIFEST & SERVICE WORKER
+    // -------------------------------------------------------------------------
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    async function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      } else {
+        showToast('📲 ब्राउझर मेनूमधून "Add to Home Screen" निवडा!');
+      }
+    }
+
+    function registerInlinePWA() {
+      try {
+        const manifest = {
+          name: 'निपुण बालमित्र 2.0',
+          short_name: 'निपुण बालमित्र',
+          description: 'सरावातून निपुणतेकडे - निपुण महाराष्ट्र २०२६-२७ सराव अँप',
+          start_url: './',
+          display: 'standalone',
+          background_color: '#FFFDF7',
+          theme_color: '#0F766E'
+        };
+        const mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(mBlob);
+        document.head.appendChild(link);
+
+        if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+          const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+            self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+          `;
+          const swBlob = new Blob([swCode], { type: 'application/javascript' });
+          navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+        }
+      } catch (_) {}
+    }
+
+    // -------------------------------------------------------------------------
+    // 14. INITIALIZE APP
+    // -------------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSavedState();
+      registerInlinePWA();
+      loadAllImagesFromIDB();
+      goToScreen(0);
+    });
+  </script>
+</body>
+</html>
