@@ -1,20 +1,24 @@
 {
+  "id": "/Nipun-Balmitra-2.0/",
   "name": "निपुण बालमित्र 2.0",
   "short_name": "निपुण बालमित्र",
-  "start_url": "./index.html",
+  "start_url": "/Nipun-Balmitra-2.0/index.html",
+  "scope": "/Nipun-Balmitra-2.0/",
   "display": "standalone",
-  "background_color": "#fff8ee",
-  "theme_color": "#ea580c",
+  "background_color": "#FFFDF7",
+  "theme_color": "#0F766E",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135755.png",
+      "src": "/Nipun-Balmitra-2.0/icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135755.png",
+      "src": "/Nipun-Balmitra-2.0/icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
