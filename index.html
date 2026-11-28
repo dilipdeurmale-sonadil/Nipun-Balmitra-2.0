@@ -199,7 +199,7 @@
       padding: 2px 6px;
       margin: 2px;
       border-radius: 8px;
-      transition: all 0.2s ease;
+      transition: all 0.08s ease;
     }
     .k-word.k-correct {
       background: #DCFCE7;
@@ -1443,29 +1443,48 @@
       const targetRaw = (targetText || '').trim().split(/\s+/).filter(Boolean);
       const spokenRaw = (spokenText || '').trim().split(/\s+/).filter(Boolean);
       const targetClean = targetRaw.map(cleanWordToken);
-      const spokenClean = spokenRaw.map(cleanWordToken).filter(Boolean);
+      const spokenClean = spokenRaw.map(cleanWordToken);
 
-      // 1. Highlight words on target text (Karaoke + Green/Red diff)
+      // Sequential 1-to-1 matching so duplicate words (e.g. 'आहे' twice) highlight in order
+      const matchedTarget = new Array(targetClean.length).fill(false);
+      const matchedSpoken = new Array(spokenRaw.length).fill(false);
       let matchedCount = 0;
       let lastMatchedIdx = -1;
+
+      for (let si = 0; si < spokenClean.length; si++) {
+        const sw = spokenClean[si];
+        if (!sw) continue;
+        // Find first unmatched target word matching this spoken word
+        let foundIdx = -1;
+        for (let ti = 0; ti < targetClean.length; ti++) {
+          if (matchedTarget[ti]) continue;
+          const tw = targetClean[ti];
+          if (tw && (sw === tw || (tw.length > 1 && sw.includes(tw)))) {
+            foundIdx = ti;
+            break;
+          }
+        }
+        if (foundIdx !== -1) {
+          matchedTarget[foundIdx] = true;
+          matchedSpoken[si] = true;
+          matchedCount++;
+          lastMatchedIdx = foundIdx;
+        }
+      }
+
+      // 1. Highlight words on Green Board (Instant Karaoke + Green/Red)
       targetClean.forEach((tw, idx) => {
         const el = document.getElementById('kw_' + idx);
-        const isMatched = tw && spokenClean.some(sw => sw === tw || (tw.length > 1 && sw.includes(tw)));
-        if (isMatched) {
-          matchedCount++;
-          lastMatchedIdx = idx;
-        }
-        if (el) {
-          el.classList.remove('k-correct', 'k-active', 'k-wrong');
-          if (isMatched) {
-            el.classList.add('k-correct');
-          } else if (isFinal && spokenClean.length > 0) {
-            el.classList.add('k-wrong');
-          }
+        if (!el) return;
+        el.classList.remove('k-correct', 'k-active', 'k-wrong');
+        if (matchedTarget[idx]) {
+          el.classList.add('k-correct');
+        } else if (isFinal) {
+          el.classList.add('k-wrong');
         }
       });
 
-      // Karaoke glow on the latest spoken word while reading live
+      // Karaoke glow on the exact word just spoken
       if (!isFinal && lastMatchedIdx >= 0) {
         const activeEl = document.getElementById('kw_' + lastMatchedIdx);
         if (activeEl) {
@@ -1482,10 +1501,8 @@
           diffBox.innerHTML = '';
         } else {
           diffBox.classList.remove('hidden');
-          const badges = spokenRaw.map(rawW => {
-            const cw = cleanWordToken(rawW);
-            const ok = cw && targetClean.some(tw => tw && (cw === tw || (tw.length > 1 && cw.includes(tw))));
-            return ok
+          const badges = spokenRaw.map((rawW, si) => {
+            return matchedSpoken[si]
               ? `<span class="inline-block px-2 py-0.5 m-0.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold">${rawW}</span>`
               : `<span class="inline-block px-2 py-0.5 m-0.5 rounded-lg bg-rose-100 text-rose-700 border border-rose-300 font-extrabold">${rawW}</span>`;
           }).join('');
@@ -1494,7 +1511,52 @@
       }
 
       const pct = targetClean.length > 0 ? Math.round((matchedCount / targetClean.length) * 100) : 0;
-      return { pct, matchedCount, total: targetClean.length, spokenCount: spokenClean.length };
+
+      // 3. Show bold percentage + Retry button (<75%) directly on Green Board when finished
+      const scoreBox = document.getElementById('boardScoreBox');
+      if (scoreBox) {
+        if (!isFinal) {
+          scoreBox.classList.add('hidden');
+          scoreBox.innerHTML = '';
+        } else {
+          scoreBox.classList.remove('hidden');
+          if (pct >= 75) {
+            scoreBox.innerHTML = `
+              <div class="text-2xl sm:text-3xl font-black text-emerald-300 tracking-wide">🌟 वाचन अचूकता : ${toMr(pct)}%</div>
+              <div class="text-xs sm:text-sm font-extrabold text-amber-200 mt-0.5">शाब्बास! उत्कृष्ट व निपुण वाचन! (+५ तारे)</div>
+            `;
+          } else {
+            scoreBox.innerHTML = `
+              <div class="text-2xl sm:text-3xl font-black text-amber-300 tracking-wide">📊 वाचन अचूकता : ${toMr(pct)}%</div>
+              <div class="text-xs font-bold text-rose-200 mt-0.5">अचूकता ७५% पेक्षा कमी आहे. लाल शब्द पुन्हा वाचा.</div>
+              <button type="button" onclick="retryReading()"
+                class="touch-btn mt-2 px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-extrabold shadow-lg border-2 border-amber-200">
+                🔄 पुन्हा प्रयत्न करा
+              </button>
+            `;
+          }
+        }
+      }
+
+      return { pct, matchedCount, total: targetClean.length, spokenCount: spokenClean.filter(Boolean).length };
+    }
+
+    function retryReading() {
+      stopAllAudioAndMic();
+      recognizedTranscript = '';
+      accumulatedTranscript = '';
+      const inp = document.getElementById('gboardReadInput');
+      if (inp) inp.value = '';
+      const diffBox = document.getElementById('spokenDisplayBox');
+      if (diffBox) { diffBox.classList.add('hidden'); diffBox.innerHTML = ''; }
+      const scoreBox = document.getElementById('boardScoreBox');
+      if (scoreBox) { scoreBox.classList.add('hidden'); scoreBox.innerHTML = ''; }
+      document.querySelectorAll('#readingTargetBox .k-word').forEach(el => {
+        el.classList.remove('k-correct', 'k-active', 'k-wrong');
+      });
+      const hint = document.getElementById('readHint');
+      if (hint) hint.textContent = '🎙️ पुन्हा वाचन सुरू करण्यासाठी "सुरू करा" किंवा कीबोर्ड माईक वापरा.';
+      showToast('🔄 पुन्हा प्रयत्न करा!');
     }
 
     async function startMic(targetText, isOral = false) {
@@ -1635,7 +1697,7 @@
         return;
       }
 
-      if (res.pct >= 80) {
+      if (res.pct >= 75) {
         markQuestionSolved(qKey);
         if (hint) hint.textContent = `🟢 अचूकता ${toMr(res.pct)}% • निपुण वाचन! (+५ तारे)`;
         showToast(`🌟 निपुण वाचन! अचूकता: ${toMr(res.pct)}%`);
@@ -1657,7 +1719,7 @@
 
       const res = updateLiveReadingFeedback(targetText, spoken, true);
       const qKey = `${state.grade}_${state.subject}_${state.domain}_${state.levelNum}_${state.qIdx}`;
-      if (res.pct >= 80) {
+      if (res.pct >= 75) {
         markQuestionSolved(qKey);
         if (hint) hint.textContent = `🟢 अचूकता ${toMr(res.pct)}% • निपुण वाचन! (+५ तारे)`;
         showToast(`🌟 निपुण वाचन! अचूकता: ${toMr(res.pct)}%`);
@@ -2180,6 +2242,7 @@
                 ${karaokeHtml}
               </div>
               <div id="spokenDisplayBox" class="hidden w-full border-t-2 border-dashed border-emerald-400/50 pt-2.5 mt-1"></div>
+              <div id="boardScoreBox" class="hidden w-full mt-1 p-2.5 rounded-xl bg-black/35 border-2 border-amber-300/80 text-center"></div>
             </div>
 
             <div class="shrink-0 flex items-center justify-center gap-2 h-4">
@@ -2191,7 +2254,7 @@
               <button type="button" onclick="speakMarathi(\`${safeText}\`, 0.85, true)" class="audio-ctrl-btn bg-amber-500 text-white"><span>🔊</span><span>वाक्य ऐका</span></button>
               <button id="btnRecStart" type="button" onclick="startMic(\`${safeText}\`, false)" class="audio-ctrl-btn bg-emerald-600 text-white"><span>🎙️</span><span>सुरू करा</span></button>
               <button id="btnRecPause" type="button" onclick="pauseResumeMic()" disabled class="audio-ctrl-btn bg-teal-600 text-white"><span>⏸️</span><span>थांबवा</span></button>
-              <button id="btnRecStop" type="button" onclick="finishMic(\`${safeText}\`, false)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>बंद करा</span></button>
+              <button id="btnRecStop" type="button" onclick="finishMic(\`${safeText}\`, false)" disabled class="audio-ctrl-btn bg-rose-600 text-white"><span>⏹️</span><span>वाचन थांबवा</span></button>
             </div>
 
             <!-- Alternative: Gboard Voice Mic + Live Karaoke + Self-Check -->
